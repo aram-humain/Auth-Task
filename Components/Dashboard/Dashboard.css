@@ -1,0 +1,155 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    min-height: 100vh;
+
+    padding: 40px 20px;
+
+    background: linear-gradient(135deg,
+            #667eea 0%,
+            #764ba2 100%);
+
+    color: #333;
+}
+
+.dashboard_container {
+    width: 100%;
+    max-width: 700px;
+
+    margin: 0 auto;
+}
+
+.dashboard_card {
+    background: #ffffff;
+
+    padding: 40px;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.20);
+}
+
+.dashboard_header {
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.dashboard_header h1 {
+    color: #222;
+
+    font-size: 32px;
+
+    margin-bottom: 10px;
+}
+
+.dashboard_header p {
+    color: #777;
+
+    font-size: 16px;
+}
+
+.dashboard_header strong {
+    color: #667eea;
+}
+
+.info-section {
+    margin-top: 25px;
+}
+
+.info-section h2 {
+    color: #222;
+
+    font-size: 21px;
+
+    margin-bottom: 18px;
+}
+
+.info-box {
+    background: #f7f8fc;
+
+    border: 1px solid #e5e7ef;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.info-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px 18px;
+
+    border-bottom: 1px solid #e5e7ef;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #666;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.info-value {
+    color: #222;
+
+    font-size: 15px;
+
+    text-align: right;
+}
+
+.logout-container {
+    margin-top: 30px;
+
+    text-align: center;
+}
+
+.logout-button {
+    display: inline-block;
+
+    padding: 12px 25px;
+
+    border-radius: 8px;
+
+    background: #fff0f0;
+
+    border: 1px solid #ffcaca;
+
+    color: #d93025;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition:
+        background 0.2s,
+        transform 0.2s;
+}
+
+.logout-button:hover {
+    background: #ffe0e0;
+
+    transform: translateY(-2px);
+}
+
+.logout-button:active {
+    transform: translateY(0);
+}
