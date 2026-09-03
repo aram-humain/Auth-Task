@@ -1,5 +1,6 @@
 {
     "require": {
-        "phpmailer/phpmailer": "^7.1"
+        "railsware/mailtrap-php": "^3.15",
+        "php-http/guzzle7-adapter": "^1.1"
     }
 }

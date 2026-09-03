@@ -36,15 +36,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             $code = (string) random_int(100000, 999999);
-            createUser($pdo, $name, $email, $password, password_hash($code, PASSWORD_DEFAULT));
+            $pdo->beginTransaction();
+            createUser($pdo, $name, $email, $password, $code);
             sendVerificationEmail($email, $name, $code);
+            $pdo->commit();
 
             header('Location: Verify.php?email=' . urlencode($email));
             exit;
         } catch (Throwable $e) {
 
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            error_log($e->getMessage());
+
             if ($e->getCode() === '23000') {
                 $errors[] = 'An account with this email already exists.';
+            } elseif (str_contains($e->getMessage(), 'Sending from domain')) {
+                $errors[] = 'Email could not be sent. Verify MAIL_FROM_ADDRESS in Mailtrap.';
+            } elseif (str_contains($e->getMessage(), 'Could not authenticate')) {
+                $errors[] = 'Email could not be sent. Check Mailtrap Sandbox username and password.';
+            } elseif (str_contains($e->getMessage(), 'Mailtrap API key is missing')) {
+                $errors[] = 'Email could not be sent. Add MAILTRAP_API_KEY to .env.';
+            } elseif (str_contains($e->getMessage(), 'Demo domains can only be used')) {
+                $errors[] = 'Mailtrap demo emails can only be sent to the account owner email.';
             } else {
                 $errors[] = 'Something went wrong. Please try again.';
             }

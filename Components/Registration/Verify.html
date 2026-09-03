@@ -16,6 +16,9 @@
             <?php if ($error): ?>
                 <div class="error-box"><p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p></div>
             <?php endif; ?>
+            <?php if ($success): ?>
+                <div class="success-box"><p><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p></div>
+            <?php endif; ?>
             <form method="POST" action="">
                 <input type="hidden" name="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>">
                 <div class="form-group">
@@ -23,6 +26,11 @@
                     <input type="text" id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
                 </div>
                 <button type="submit" class="register-button">Verify Email</button>
+            </form>
+            <form method="POST" action="">
+                <input type="hidden" name="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="action" value="resend">
+                <button type="submit" class="register-button">Resend Code</button>
             </form>
         </div>
     </div>
