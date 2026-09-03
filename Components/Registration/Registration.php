@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/RegisterVal.php';
 require_once __DIR__ . '/RegisterDB.php';
+require_once __DIR__ . '/../../config/mail.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -34,11 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
-            createUser($pdo, $name, $email, $password);
+            $code = (string) random_int(100000, 999999);
+            createUser($pdo, $name, $email, $password, password_hash($code, PASSWORD_DEFAULT));
+            sendVerificationEmail($email, $name, $code);
 
-            header('Location: ../Login/Login.php?registered=1');
+            header('Location: Verify.php?email=' . urlencode($email));
             exit;
-        } catch (PDOException $e) {
+        } catch (Throwable $e) {
 
             if ($e->getCode() === '23000') {
                 $errors[] = 'An account with this email already exists.';

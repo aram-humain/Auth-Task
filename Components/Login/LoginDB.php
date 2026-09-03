@@ -3,9 +3,11 @@
 function findUserByCredentials(PDO $pdo, string $email, string $password): ?array
 {
     $statement = $pdo->prepare(
-        "SELECT id, name, email, password
-         FROM users
-         WHERE email = :email
+                "SELECT users.id, users.name, users.email, users.password
+                 FROM users
+                 INNER JOIN email_verifications ON email_verifications.user_id = users.id
+                 WHERE email_verifications.verified_at IS NOT NULL
+                     AND users.email = :email
          LIMIT 1"
     );
 
