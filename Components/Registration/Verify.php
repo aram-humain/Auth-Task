@@ -4,11 +4,23 @@ require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/VerifyDB.php';
 require_once __DIR__ . '/../../config/mail.php';
 
+$token = trim($_GET['token'] ?? '');
 $email = trim($_GET['email'] ?? $_POST['email'] ?? '');
 $error = '';
 $success = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_GET['unverified'])) {
+    $error = 'Please verify your email before opening the Dashboard.';
+}
+
+if ($token !== '') {
+    if (verifyEmailToken($pdo, $token)) {
+        header('Location: ../Login/Login.php?verified=1');
+        exit;
+    }
+
+    $error = 'The verification link is invalid or expired.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'verify';
 
     if ($action === 'resend') {
@@ -16,17 +28,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'A valid email address is required.';
         } else {
             try {
-                $code = (string) random_int(100000, 999999);
+                $newToken = bin2hex(random_bytes(32));
                 $pdo->beginTransaction();
-                $name = replaceVerificationCode($pdo, $email, $code);
+                $name = replaceVerificationToken($pdo, $email, $newToken);
 
                 if ($name === null) {
                     throw new RuntimeException('Verification request was not found.');
                 }
 
-                sendVerificationEmail($email, $name, $code);
+                sendVerificationLinkEmail($email, $name, $newToken);
                 $pdo->commit();
-                $success = 'A new confirmation code has been sent.';
+                $success = 'A new verification link has been sent.';
             } catch (Throwable $exception) {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
@@ -36,16 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
-        $code = trim($_POST['code'] ?? '');
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^\d{6}$/', $code)) {
-            $error = 'Enter the six-digit code from your email.';
-        } elseif (verifyEmailCode($pdo, $email, $code)) {
-            header('Location: ../Login/Login.php?verified=1');
-            exit;
-        } else {
-            $error = 'The code is invalid or expired.';
-        }
+        $error = 'Open the verification link from your email.';
     }
 }
 

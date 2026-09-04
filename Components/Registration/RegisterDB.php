@@ -13,7 +13,7 @@ function emailAlreadyExists(PDO $pdo, string $email): bool
     return (bool) $statement->fetch();
 }
 
-function createUser(PDO $pdo, string $name, string $email, string $password, string $code): void
+function createUser(PDO $pdo, string $name, string $email, string $password, string $token): void
 {
     $ownsTransaction = !$pdo->inTransaction();
 
@@ -24,10 +24,10 @@ function createUser(PDO $pdo, string $name, string $email, string $password, str
     try {
         $statement = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
         $statement->execute(['name' => $name, 'email' => $email, 'password' => password_hash($password, PASSWORD_DEFAULT)]);
-        $verification = $pdo->prepare("INSERT INTO email_verifications (user_id, code_hash, expires_at) VALUES (:user_id, :code_hash, DATE_ADD(NOW(), INTERVAL 15 MINUTE))");
+        $verification = $pdo->prepare("INSERT INTO email_verifications (user_id, token_hash, expires_at) VALUES (:user_id, :token_hash, DATE_ADD(NOW(), INTERVAL 60 MINUTE))");
         $verification->execute([
             'user_id' => $pdo->lastInsertId(),
-            'code_hash' => password_hash($code, PASSWORD_DEFAULT)
+            'token_hash' => password_hash($token, PASSWORD_DEFAULT)
         ]);
         if ($ownsTransaction) {
             $pdo->commit();

@@ -1,0 +1,158 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --ink: #172033;
+    --muted: #6c7486;
+    --line: #dce1eb;
+    --accent: #2864d7;
+    --accent-dark: #1d4ea9;
+    --surface: #ffffff;
+    --danger-bg: #fff0f0;
+    --danger-text: #b42318;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    background: linear-gradient(135deg, #e7f0ff 0%, #f5f1e8 52%, #dce9f5 100%);
+}
+
+.reset-container {
+    width: 100%;
+    max-width: 452px;
+}
+
+.reset-card {
+    padding: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 24px 60px rgba(42, 62, 92, 0.16);
+}
+
+.reset-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.reset-header h1 {
+    margin-bottom: 10px;
+    font-size: 32px;
+    line-height: 1.1;
+}
+
+.reset-header p,
+.back-link {
+    color: var(--muted);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.reset-header p {
+    line-height: 1.6;
+}
+
+.message {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border: 1px solid #f2b8b5;
+    border-radius: 6px;
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.message p + p {
+    margin-top: 4px;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--ink);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    outline: none;
+    color: var(--ink);
+    background: #fcfdff;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+}
+
+.form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(40, 100, 215, 0.14);
+}
+
+.reset-button {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--surface);
+    background: var(--accent);
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.reset-button:hover {
+    background: var(--accent-dark);
+    box-shadow: 0 8px 18px rgba(40, 100, 215, 0.24);
+    transform: translateY(-1px);
+}
+
+.reset-button:active {
+    transform: translateY(0);
+}
+
+.back-link {
+    margin-top: 26px;
+    text-align: center;
+}
+
+.back-link a {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+    .reset-card {
+        padding: 32px 24px;
+    }
+
+    .reset-header h1 {
+        font-size: 28px;
+    }
+}

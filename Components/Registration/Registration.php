@@ -35,10 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
-            $code = (string) random_int(100000, 999999);
+            $token = bin2hex(random_bytes(32));
             $pdo->beginTransaction();
-            createUser($pdo, $name, $email, $password, $code);
-            sendVerificationEmail($email, $name, $code);
+            createUser($pdo, $name, $email, $password, $token);
+            sendVerificationLinkEmail($email, $name, $token);
             $pdo->commit();
 
             header('Location: Verify.php?email=' . urlencode($email));

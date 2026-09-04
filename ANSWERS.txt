@@ -1,0 +1,20 @@
+
+- How verification and reset tokens are generated
+
+verification and reset tokens generates with 'bin2hex(random_bytes(32))' its let us to create secure and random token with length 64 
+(64, because bin2hex copying each byte to 00 or ff)
+
+- Why token expiration is necessary
+ 
+it limits the time during which link can be used
+
+- How email verification is connected to authentication
+
+LoginDB.php accepts users only when 'verified_at' IS NOT NULL and Dashboard.php do additional verification status check
+
+
+- How you prevent a token from being used more than once
+
+the verification process fills 'verified_at' and clears 'token_hash'
+password reset fills 'used_at' for future requests we need a non used token
+so when reusing the same token we should get an error

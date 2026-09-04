@@ -1,32 +1,31 @@
 <?php
 
-function verifyEmailCode(PDO $pdo, string $email, string $code): bool
+function verifyEmailToken(PDO $pdo, string $token): bool
 {
     $statement = $pdo->prepare(
-        "SELECT email_verifications.id, email_verifications.code_hash
+        "SELECT id, user_id, token_hash
          FROM email_verifications
-         INNER JOIN users ON users.id = email_verifications.user_id
-         WHERE users.email = :email
-           AND email_verifications.verified_at IS NULL
-           AND email_verifications.expires_at > NOW()
-         LIMIT 1"
+         WHERE verified_at IS NULL AND expires_at > NOW()"
     );
-    $statement->execute(['email' => $email]);
-    $verification = $statement->fetch();
+    $statement->execute();
 
-    if (!$verification || !password_verify($code, $verification['code_hash'])) {
-        return false;
+    foreach ($statement->fetchAll() as $verification) {
+        if (password_verify($token, $verification['token_hash'])) {
+            $update = $pdo->prepare(
+                "UPDATE email_verifications
+                 SET verified_at = NOW(), token_hash = ''
+                 WHERE id = :id AND verified_at IS NULL"
+            );
+            $update->execute(['id' => $verification['id']]);
+
+            return $update->rowCount() === 1;
+        }
     }
 
-    $update = $pdo->prepare(
-        "UPDATE email_verifications SET verified_at = NOW() WHERE id = :id"
-    );
-    $update->execute(['id' => $verification['id']]);
-
-    return true;
+    return false;
 }
 
-function replaceVerificationCode(PDO $pdo, string $email, string $code): ?string
+function replaceVerificationToken(PDO $pdo, string $email, string $token): ?string
 {
     $statement = $pdo->prepare(
         "SELECT users.id, users.name
@@ -45,13 +44,13 @@ function replaceVerificationCode(PDO $pdo, string $email, string $code): ?string
 
     $update = $pdo->prepare(
         "UPDATE email_verifications
-         SET code_hash = :code_hash,
-             expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+         SET token_hash = :token_hash,
+             expires_at = DATE_ADD(NOW(), INTERVAL 60 MINUTE)
          WHERE user_id = :user_id
            AND verified_at IS NULL"
     );
     $update->execute([
-        'code_hash' => password_hash($code, PASSWORD_DEFAULT),
+        'token_hash' => password_hash($token, PASSWORD_DEFAULT),
         'user_id' => $user['id']
     ]);
 
