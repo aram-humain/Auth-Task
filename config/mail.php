@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Mailtrap\Api\EmailsSendApiInterface;
 use Mailtrap\MailtrapClient;
 use Mailtrap\Mime\MailtrapEmail;
 use Symfony\Component\Mime\Address;
@@ -18,18 +19,39 @@ function mailConfig(string $key, string $default = ''): string
     return (string) ($mailEnv[$key] ?? getenv($key) ?: $default);
 }
 
+function createMailtrapClient(string $apiKey): EmailsSendApiInterface
+{
+    $apiKey = mailConfig('MAILTRAP_API_KEY');
+    if ($apiKey === '' || str_starts_with($apiKey, 'YOU_')) {
+        throw new RuntimeException('Mailtrap API key is missing in .env.');
+    }
+
+    $isSandbox = filter_var(
+        mailConfig('MAILTRAP_USE_SANDBOX', 'true'),
+        FILTER_VALIDATE_BOOL
+    );
+
+    $inboxId = $isSandbox ? mailConfig('MAILTRAP_INBOX_ID') : null;
+
+    if ($isSandbox && $inboxId === '') {
+        throw new RuntimeException('Mailtrap Sandbox inbox ID is missing.');
+    }
+
+    return MailtrapClient::initSendingEmails(
+        apiKey: $apiKey,
+        isSandbox: $isSandbox,
+        inboxId: $inboxId
+    );
+}
+
 function sendVerificationLinkEmail(string $email, string $name, string $token): void
 {
     $apiKey = mailConfig('MAILTRAP_API_KEY');
 
-    if ($apiKey === '' || str_starts_with($apiKey, 'YOUR_')) {
-        throw new RuntimeException('Mailtrap API key is missing in .env.');
-    }
-
     $verifyUrl = rtrim(mailConfig('APP_URL', 'http://localhost:8000'), '/')
         . '/Components/Registration/Verify.php?token=' . urlencode($token);
 
-    $mailtrap = MailtrapClient::initSendingEmails(apiKey: $apiKey);
+    $mailtrap = createMailtrapClient(apiKey: $apiKey);
     $message = (new MailtrapEmail())
         ->from(new Address(mailConfig('MAIL_FROM_ADDRESS', 'hello@demomailtrap.co'), mailConfig('MAIL_FROM_NAME', 'Auth Task')))
         ->to(new Address($email, $name))
@@ -45,14 +67,10 @@ function sendPasswordResetEmail(string $email, string $name, string $token): voi
 {
     $apiKey = mailConfig('MAILTRAP_API_KEY');
 
-    if ($apiKey === '' || str_starts_with($apiKey, 'YOUR_')) {
-        throw new RuntimeException('Mailtrap API key is missing in .env.');
-    }
-
     $resetUrl = rtrim(mailConfig('APP_URL', 'http://localhost:8000'), '/')
         . '/Components/PasswordReset/Reset.php?token=' . urlencode($token);
 
-    $mailtrap = MailtrapClient::initSendingEmails(apiKey: $apiKey);
+    $mailtrap = createMailtrapClient(apiKey: $apiKey);
     $message = (new MailtrapEmail())
         ->from(new Address(mailConfig('MAIL_FROM_ADDRESS', 'hello@demomailtrap.co'), mailConfig('MAIL_FROM_NAME', 'Auth Task')))
         ->to(new Address($email, $name))

@@ -1,0 +1,121 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: var(--bg-color);
+    color: var(--text-color);
+
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
+}
+
+.moderator-container {
+    width: 100%;
+    max-width: 900px;
+}
+
+.moderator-card {
+    padding: 32px;
+
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+
+    background: var(--card-color);
+
+    box-shadow: var(--shadow);
+}
+
+.moderator-card h1 {
+    margin-bottom: 12px;
+
+    color: var(--text-color);
+
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.moderator-description {
+    margin-bottom: 30px;
+
+    color: var(--secondary-text);
+
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.moderator-actions {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.moderator-button {
+    display: inline-block;
+
+    padding: 11px 18px;
+
+    border: 1px solid transparent;
+    border-radius: 8px;
+
+    background: var(--primary-color);
+    color: white;
+
+    text-decoration: none;
+    font-weight: 600;
+
+    transition:
+        background-color 0.2s,
+        transform 0.2s;
+}
+
+.moderator-button:hover {
+    background: var(--primary-hover);
+
+    transform: translateY(-1px);
+}
+
+.moderator-button:active {
+    transform: translateY(0);
+}
+
+.moderator-button-secondary {
+    border-color: var(--border-color);
+
+    background: transparent;
+    color: var(--text-color);
+}
+
+.moderator-button-secondary:hover {
+    background: var(--bg-color);
+}
+
+@media (max-width: 600px) {
+
+    .moderator-card {
+        padding: 28px 22px;
+    }
+
+    .moderator-actions {
+        flex-direction: column;
+    }
+
+    .moderator-button {
+        width: 100%;
+        text-align: center;
+    }
+}

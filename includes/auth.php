@@ -9,10 +9,11 @@ function isLoggedIn(): bool
     return isset($_SESSION['user_id']);
 }
 
+
 function requireLogin(): void
 {
     if (!isLoggedIn()) {
-        header('Location: ../Login/Login.php');
+        header('Location: /Components/Login/Login.php');
         exit;
     }
 }

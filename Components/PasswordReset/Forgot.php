@@ -32,4 +32,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once __DIR__ . '/Forgot.html';
+require_once __DIR__ . '/Forgot.html.php';

@@ -68,4 +68,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once __DIR__ . '/Registration.html';
+require_once __DIR__ . '/Registration.html.php';

@@ -32,4 +32,4 @@ if ($token === '') {
     }
 }
 
-require_once __DIR__ . '/Reset.html';
+require_once __DIR__ . '/Reset.html.php';

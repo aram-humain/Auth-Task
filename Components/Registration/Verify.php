@@ -52,4 +52,4 @@ if ($token !== '') {
     }
 }
 
-require_once __DIR__ . '/Verify.html';
+require_once __DIR__ . '/Verify.html.php';

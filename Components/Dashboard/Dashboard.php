@@ -1,7 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../../config/db.php';
-require_once __DIR__ . '/../../includes/auth.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
+
 
 requireLogin();
 
@@ -23,15 +24,15 @@ $user = $statement->fetch();
 if (!$user) {
     logoutUser();
 
-    header('Location: ../Login/Login.php');
+    header('Location: /Components/Login/Login.php');
     exit;
 }
 
 if ($user['verified_at'] === null) {
-    header('Location: ../Registration/Verify.php?email=' . urlencode($user['email']) . '&unverified=1');
+    header('Location: /Components/Registration/Verify.php?email=' . urlencode($user['email']) . '&unverified=1');
     exit;
 }
 
-?>
+requirePermission($pdo, 'view_dashboard');
 
-<?php require_once __DIR__ . '/Dashboard.html'; ?>
+require_once __DIR__ . '/Dashboard.html.php';

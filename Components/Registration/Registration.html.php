@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Account</title>
+
+    <link
+        rel="stylesheet"
+        href="./Registration.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/assets/css/theme.css"
+    >
+
+    <script src="/assets/js/theme.js"></script>
+
+</head>
+
+<body>
+
+<button
+    type="button"
+    id="theme-toggle"
+    class="theme-toggle"
+>
+    Theme
+</button>
+
+<div class="register-container">
+
+    <div class="register-card">
+
+        <div class="register-header">
+
+            <h1>
+                Create Account
+            </h1>
+
+            <p>
+                Sign up to get started
+            </p>
+
+        </div>
+
+        <?php if (!empty($errors)): ?>
+
+            <div class="error-box">
+
+                <?php foreach ($errors as $error): ?>
+
+                    <p>
+                        <?= htmlspecialchars(
+                            $error,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>
+                    </p>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        <?php endif; ?>
+
+        <form method="POST" action="">
+
+            <div class="form-group">
+
+                <label for="name">
+                    Name
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your name"
+                    value="<?= htmlspecialchars(
+                        $name,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    value="<?= htmlspecialchars(
+                        $email,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Minimum 8 characters"
+                    minlength="8"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="register-button"
+            >
+                Create Account
+            </button>
+
+        </form>
+
+        <p class="login-link">
+
+            Already have an account?
+
+            <a href="/Components/Login/Login.php">
+                Login
+            </a>
+
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
