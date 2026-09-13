@@ -146,3 +146,106 @@ Register
 → Edit Post
 → View Other User Profile
 → View Other User Posts
+
+
+
+
+
+* ------------------------------ TASK 4 PODGOTOVKA ------------------------------ *
+
+Auth-Task/
+├── assets/
+│   ├── css/
+│   │   └── theme.css
+│   └── js/
+│       └── theme.js
+│
+├── uploads/
+│   └── profile-pictures/
+│
+├── Components/
+│   ├── Admin/
+│   │   ├── Audit/
+│   │   └── Users/
+│   │
+│   ├── Dashboard/
+│   ├── Error/
+│   ├── Login/
+│   ├── Moderator/
+│   ├── PasswordReset/
+│   ├── Registration/
+│   │
+│   ├── Profile/
+│   │   ├── Profile.php
+│   │   ├── ProfileDB.php
+│   │   ├── Profile.html.php
+│   │   ├── Profile.css
+│   │   └── EditProfile.php
+│   │
+│   ├── Posts/
+│   │   ├── Posts.php
+│   │   ├── PostsDB.php
+│   │   ├── Posts.html.php
+│   │   ├── Posts.css
+│   │   ├── CreatePost.php
+│   │   ├── EditPost.php
+│   │   └── DeletePost.php
+│   │
+│   ├── Skills/
+│   │   ├── Skills.php
+│   │   └── SkillsDB.php
+│   │
+│   └── Experience/
+│       ├── Experience.php
+│       └── ExperienceDB.php
+│
+├── config/
+│   ├── db.php
+│   └── mail.php
+│
+├── includes/
+│   ├── auth.php
+│   ├── authorization.php
+│   ├── csrf.php
+│   ├── flash.php
+│   └── upload.php
+│
+├── vendor/
+├── logout.php
+├── index.php
+├── .env
+├── .gitignore
+├── composer.json
+└── composer.lock
+
+
+
+Порядок работы
+
+Сделать Git commit завершённого Task 3.
+Создать таблицу profiles и связь users 1 → 1 profiles.
+Создать пустые profiles для уже существующих пользователей.
+Добавить автоматическое создание profile при регистрации.
+Сделать просмотр собственного profile.
+Сделать редактирование First Name, Last Name, Phone, Location, Date of Birth, Bio.
+Сделать просмотр profile другого пользователя.
+Закрыть изменение чужого profile на backend.
+Сделать upload.php для общей работы с файлами.
+Добавить Profile Picture: upload, replace, remove, default picture.
+Создать таблицу posts и связь users 1 → N posts.
+Сделать Create Post.
+Показать posts пользователя внутри его Profile.
+Сделать общий Posts Feed.
+Сделать переход Author → Profile.
+Сделать Edit Post с ownership-проверкой.
+Сделать Delete Post с ownership-проверкой.
+Добавить CSRF ко всем POST-действиям.
+Создать Skills.
+Связать Skills с конкретным пользователем.
+Показать Skills внутри Profile.
+Сделать Add / Edit / Delete Skill только владельцу profile.
+Создать Work Experience.
+Добавить Company, Position, Location, Start Date, End Date, Description.
+Показать Work Experience внутри Profile.
+Сделать Add / Edit / Delete Experience только владельцу.
+В конце пройти полный flow от Register до просмотра Profile, Posts, Skills и Work Experience.
