@@ -1,0 +1,148 @@
+Task 4: User Profile Management + Posts
+
+Goal
+
+Continue the existing Authentication and Role Management system by adding User Profile and Posts functionality.
+
+A user should be able to have a personal profile, update their information, have a profile picture, and publish posts.
+
+This functionality should work with the existing authentication and authorization system.
+
+
+--------------------------------------------------
+1. User Profile
+--------------------------------------------------
+
+Each registered user should have a profile.
+
+The profile should contain at least:
+
+- First Name
+- Last Name
+- Phone
+- Location
+- Date of Birth
+- Bio
+- Profile Picture
+
+The user should be able to view and update their profile information.
+
+
+--------------------------------------------------
+2. Profile Picture
+--------------------------------------------------
+
+The user should be able to:
+
+- Add a profile picture
+- Replace an existing profile picture
+- Remove a profile picture
+
+The profile should also work correctly when the user does not have a profile picture.
+
+
+--------------------------------------------------
+3. Profile Access
+--------------------------------------------------
+
+Users should be able to view other users' profiles.
+
+A user should only be able to modify their own profile.
+
+An Admin should be able to view all user profiles.
+
+
+--------------------------------------------------
+4. Create Post
+--------------------------------------------------
+
+A logged-in user should be able to create a post.
+
+A post should contain at least:
+
+- Title
+- Content
+- Created Date
+
+The post should be associated with the user who created it.
+
+
+--------------------------------------------------
+5. View Posts
+--------------------------------------------------
+
+Users should be able to view their own posts and posts created by other users.
+
+A user's profile page should display the posts published by that user.
+
+For example:
+
+User A Profile
+→ User A Posts
+
+User B Profile
+→ User B Posts
+
+
+--------------------------------------------------
+6. Edit Post
+--------------------------------------------------
+
+A user should be able to edit posts they created.
+
+After an update, the new post information should be displayed wherever the post is shown.
+
+
+--------------------------------------------------
+7. Delete Post
+--------------------------------------------------
+
+A user should be able to delete posts they created.
+
+A deleted post should no longer be available during normal application usage.
+
+
+--------------------------------------------------
+8. Post Ownership
+--------------------------------------------------
+
+A user should not be able to edit or delete another user's post.
+
+Posts created by other users should only be available for viewing.
+
+
+--------------------------------------------------
+9. Posts Feed
+--------------------------------------------------
+
+Create a common page where users can view posts published in the system.
+
+For example:
+
+/posts.php
+
+For each post, display at least:
+
+- Author
+- Title
+- Content
+- Created Date
+
+It should be possible to navigate from the author's name to their profile page.
+
+
+--------------------------------------------------
+Expected User Flow
+--------------------------------------------------
+
+Register
+→ Verify Email
+→ Login
+→ Open Profile
+→ Add / Edit Profile Information
+→ Add Profile Picture
+→ Create Post
+→ View Post
+→ Edit Post
+→ View Other User Profile
+→ View Other User Posts
