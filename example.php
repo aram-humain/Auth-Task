@@ -20,19 +20,20 @@ function createUser(
     string $email,
     string $password,
     string $token
-): void {
+): int {
     $ownsTransaction = !$pdo->inTransaction();
 
-    if($ownsTransaction) {
+    if ($ownsTransaction) {
         $pdo->beginTransaction();
     }
 
     try {
-        // create user
+
+        // 1. Create user
         $stmt = $pdo->prepare(
-        'INSERT INTO users 
-        (email, password)
-         VALUES (:email, :password)');
+            'INSERT INTO users (email, password)
+             VALUES (:email, :password)'
+        );
 
         $stmt->execute([
             'email' => $email,
@@ -41,7 +42,8 @@ function createUser(
 
         $userId = (int) $pdo->lastInsertId();
 
-        // profile creation
+
+        // 2. Create profile
         $profileStatement = $pdo->prepare(
             'INSERT INTO profiles (
                 user_id,
@@ -61,34 +63,38 @@ function createUser(
             'last_name' => $lastName
         ]);
 
-        $roleStatment = $pdo->prepare(
-            'SELECT id 
-            FROM roles 
-            WHERE name = :role_name 
-            LIMIT 1');
 
-        $roleStatment->execute([
+        // 3. Get default user role
+        $roleStatement = $pdo->prepare(
+            'SELECT id
+             FROM roles
+             WHERE name = :role_name
+             LIMIT 1'
+        );
+
+        $roleStatement->execute([
             'role_name' => 'user'
         ]);
 
-        $roleId = $roleStatment->fetchColumn();
+        $roleId = $roleStatement->fetchColumn();
 
-        if($roleId === false) {
+        if ($roleId === false) {
             throw new RuntimeException(
-                'Default user role doest not exist.'
+                'Default user role does not exist.'
             );
         }
 
+
+        // 4. Assign role to user
         $userRoleStatement = $pdo->prepare(
             'INSERT INTO user_roles (
                 user_id,
                 role_id
             )
-              VALUES
-               (
+            VALUES (
                 :user_id,
                 :role_id
-             )'
+            )'
         );
 
         $userRoleStatement->execute([
@@ -96,18 +102,36 @@ function createUser(
             'role_id' => (int) $roleId
         ]);
 
-        $verification = $pdo->prepare('INSERT INTO email_verifications (user_id, token_hash, expires_at) VALUES (:user_id, :token_hash, DATE_ADD(NOW(), INTERVAL 60 MINUTE))');
+
+        // 5. Create email verification
+        $verification = $pdo->prepare(
+            'INSERT INTO email_verifications (
+                user_id,
+                token_hash,
+                expires_at
+            )
+            VALUES (
+                :user_id,
+                :token_hash,
+                DATE_ADD(NOW(), INTERVAL 60 MINUTE)
+            )'
+        );
 
         $verification->execute([
             'user_id' => $userId,
             'token_hash' => password_hash($token, PASSWORD_DEFAULT)
         ]);
 
+
         if ($ownsTransaction) {
             $pdo->commit();
         }
-    } catch (\Throwable $exception) {
-        if($ownsTransaction && $pdo->inTransaction()) {
+
+        return $userId;
+
+    } catch (Throwable $exception) {
+
+        if ($ownsTransaction && $pdo->inTransaction()) {
             $pdo->rollBack();
         }
 

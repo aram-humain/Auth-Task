@@ -1,11 +1,19 @@
 <?php
 
-function validateRegistrationInput(string $name, string $email, string $password): array
-{
+function validateRegistrationInput(
+	string $firstName,
+	string $lastName,
+	string $email,
+	string $password
+): array {
 	$errors = [];
 
-	if ($name === '') {
-		$errors[] = 'Name is required.';
+	if ($firstName === '') {
+		$errors[] = 'First name is required.';
+	}
+
+	if ($lastName === '') {
+		$errors[] = 'Last name is required.';
 	}
 
 	if ($email === '') {
