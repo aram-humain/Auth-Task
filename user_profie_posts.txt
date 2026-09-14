@@ -153,85 +153,38 @@ Register
 
 * ------------------------------ TASK 4 PODGOTOVKA ------------------------------ *
 
-Auth-Task/
-├── assets/
-│   ├── css/
-│   │   └── theme.css
-│   └── js/
-│       └── theme.js
-│
-├── uploads/
-│   └── profile-pictures/
-│
-├── Components/
-│   ├── Admin/
-│   │   ├── Audit/
-│   │   └── Users/
-│   │
-│   ├── Dashboard/
-│   ├── Error/
-│   ├── Login/
-│   ├── Moderator/
-│   ├── PasswordReset/
-│   ├── Registration/
-│   │
-│   ├── Profile/
-│   │   ├── Profile.php
-│   │   ├── ProfileDB.php
-│   │   ├── Profile.html.php
-│   │   ├── Profile.css
-│   │   └── EditProfile.php
-│   │
-│   ├── Posts/
-│   │   ├── Posts.php
-│   │   ├── PostsDB.php
-│   │   ├── Posts.html.php
-│   │   ├── Posts.css
-│   │   ├── CreatePost.php
-│   │   ├── EditPost.php
-│   │   └── DeletePost.php
-│   │
-│   ├── Skills/
-│   │   ├── Skills.php
-│   │   └── SkillsDB.php
-│   │
-│   └── Experience/
-│       ├── Experience.php
-│       └── ExperienceDB.php
-│
-├── config/
-│   ├── db.php
-│   └── mail.php
-│
-├── includes/
-│   ├── auth.php
-│   ├── authorization.php
-│   ├── csrf.php
-│   ├── flash.php
-│   └── upload.php
-│
-├── vendor/
-├── logout.php
-├── index.php
-├── .env
-├── .gitignore
-├── composer.json
-└── composer.lock
 
 
-
-Порядок работы
-
-Сделать Git commit завершённого Task 3.✅
+Сделать Git commit завершённого Task 3. ✅
 Создать таблицу profiles и связь users 1 → 1 profiles. ✅
 Создать пустые profiles для уже существующих пользователей. ✅
 Добавить автоматическое создание profile при регистрации. ✅
-Сделать просмотр собственного profile. 
-Сделать редактирование First Name, Last Name, Phone, Location, Date of Birth, Bio.
-Сделать просмотр profile другого пользователя.
-Закрыть изменение чужого profile на backend.
-Сделать upload.php для общей работы с файлами.
-Добавить Profile Picture: upload, replace, remove, default picture.
+Сделать просмотр собственного profile. ✅
+Сделать редактирование First Name, Last Name, Phone, Location, Date of Birth, Bio. ✅
+Сделать просмотр profile другого пользователя. ✅
+Закрыть изменение чужого profile на backend. ✅
+Сделать upload.php для общей работы с файлами. ✅
+
+scenario for picture
+
+***Нет картинки
+→ выбрать JPG/PNG/WEBP
+→ Save
+→ Cloudinary upload
+→ URL + public_id в profiles
+Есть старая картинка
+→ выбрать новую
+→ новая загружается в Cloudinary
+→ БД получает новый URL/public_id
+→ старая удаляется из Cloudinary
+Есть картинка
+→ поставить Remove
+→ Save
+→ поля в БД становятся NULL
+→ файл удаляется из Cloudinary
+→ Profile показывает default avatar***
+
+Добавить Profile Picture: upload, replace, remove, default picture. ✅
 Создать таблицу posts и связь users 1 → N posts.
 Сделать Create Post.
 Показать posts пользователя внутри его Profile.

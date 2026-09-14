@@ -13,20 +13,17 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard</title>
 
     <link
         rel="stylesheet"
-        href="./Dashboard.css"
-    >
+        href="./Dashboard.css">
 
     <link
         rel="stylesheet"
-        href="/assets/css/theme.css"
-    >
+        href="/assets/css/theme.css">
 
     <script src="/assets/js/theme.js"></script>
 
@@ -34,164 +31,165 @@
 
 <body>
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle"
->
-    Theme
-</button>
+    <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle">
+        Theme
+    </button>
 
-<main class="dashboard-container">
+    <main class="dashboard-container">
 
-    <section class="dashboard-card">
+        <section class="dashboard-card">
 
-        <div class="dashboard-header">
+            <div class="dashboard-header">
 
-            <h1>
-                Dashboard
-            </h1>
+                <h1>
+                    Dashboard
+                </h1>
 
-            <p>
-                Welcome,
-                <strong>
-                    <?= htmlspecialchars(
-                        $user['email'],
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>
-                </strong>
-            </p>
-
-        </div>
-
-        <section class="info-section">
-
-            <h2>
-                Your Information
-            </h2>
-
-            <div class="info-box">
-
-                <div class="info-row">
-
-                    <span class="info-label">
-                        ID
-                    </span>
-
-                    <span class="info-value">
-                        <?= htmlspecialchars(
-                            (string) $user['id'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </span>
-
-                </div>
-
-                <div class="info-row">
-
-                    <span class="info-label">
-                        Full Name
-                    </span>
-
-                    <span class="info-value">
-                        <?= htmlspecialchars(
-                            $user['first_name'] . ' ' . $user['last_name'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </span>
-
-                </div>
-
-                <div class="info-row">
-
-                    <span class="info-label">
-                        Email
-                    </span>
-
-                    <span class="info-value">
+                <p>
+                    Welcome,
+                    <strong>
                         <?= htmlspecialchars(
                             $user['email'],
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>
-                    </span>
+                    </strong>
+                </p>
+
+            </div>
+
+            <section class="info-section">
+
+                <h2>
+                    Your Information
+                </h2>
+
+                <div class="info-box">
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            ID
+                        </span>
+
+                        <span class="info-value">
+                            <?= htmlspecialchars(
+                                (string) $user['id'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </span>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Full Name
+                        </span>
+
+                        <span class="info-value">
+                            <?= htmlspecialchars(
+                                $user['first_name'] . ' ' . $user['last_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </span>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Email
+                        </span>
+
+                        <span class="info-value">
+                            <?= htmlspecialchars(
+                                $user['email'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </span>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span class="info-label">
+                            Registered
+                        </span>
+
+                        <span class="info-value">
+                            <?= htmlspecialchars(
+                                $user['created_at'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <div class="info-row">
+            </section>
 
-                    <span class="info-label">
-                        Registered
-                    </span>
+            <div class="dashboard-actions">
 
-                    <span class="info-value">
-                        <?= htmlspecialchars(
-                            $user['created_at'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </span>
+                <?php if (can($pdo, 'access_moderator_page')): ?>
 
-                </div>
+                    <a
+                        href="/Components/Moderator/Moderator.php"
+                        class="dashboard-action">
+                        Moderator
+                    </a>
+
+                <?php endif; ?>
+
+                <?php if (can($pdo, 'access_admin_page')): ?>
+
+                    <a
+                        href="/Components/Admin/Admin.php"
+                        class="dashboard-action">
+                        Admin
+                    </a>
+
+                <?php endif; ?>
+
+                <?php if (can($pdo, 'view_users')): ?>
+
+                    <a
+                        href="/Components/Admin/Users/Users.php"
+                        class="dashboard-action">
+                        Users
+                    </a>
+
+                <?php endif; ?>
+
+                <a
+                    href="/Components/Profile/Profile.php"
+                    class="dashboard-action">
+                    Profile
+                </a>
+
+            </div>
+
+            <div class="logout-container">
+
+                <a
+                    href="../logout.php"
+                    class="logout-button">
+                    Logout
+                </a>
 
             </div>
 
         </section>
 
-        <div class="dashboard-actions">
-
-            <?php if (can($pdo, 'access_moderator_page')): ?>
-
-                <a
-                    href="/Components/Moderator/Moderator.php"
-                    class="dashboard-action"
-                >
-                    Moderator
-                </a>
-
-            <?php endif; ?>
-
-            <?php if (can($pdo, 'access_admin_page')): ?>
-
-                <a
-                    href="/Components/Admin/admin.php"
-                    class="dashboard-action"
-                >
-                    Admin
-                </a>
-
-            <?php endif; ?>
-
-            <?php if (can($pdo, 'view_users')): ?>
-
-                <a
-                    href="/Components/Admin/Users/Users.php"
-                    class="dashboard-action"
-                >
-                    Users
-                </a>
-
-            <?php endif; ?>
-
-        </div>
-
-        <div class="logout-container">
-
-            <a
-                href="../logout.php"
-                class="logout-button"
-            >
-                Logout
-            </a>
-
-        </div>
-
-    </section>
-
-</main>
+    </main>
 
 </body>
 

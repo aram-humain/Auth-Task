@@ -13,7 +13,7 @@ if (is_file($envPath)) {
 $host = $env['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
 $dbname = $env['DB_NAME'] ?? getenv('DB_NAME') ?: 'Auth_task';
 $username = $env['DB_USER'] ?? getenv('DB_USER') ?: 'root';
-$password = $env['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: $env['PASSWORD'] ?? getenv('PASSWORD') ?: '';
+$password = $env['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: '';
 
 try {
     $pdo = new PDO(

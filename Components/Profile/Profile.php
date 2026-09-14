@@ -1,22 +1,26 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Profile/ProfileDB.php';
 
-if(session_status() === PHP_SESSION_NONE) {
-    session_start();
+requireLogin();
+
+$userId = currentUserId();
+
+$slug = trim($_GET['slug'] ?? '');
+
+if($slug !== '') {
+    $profile = getProfileBySlug($pdo, $slug);
+} else {
+    $profile = getProfileByUserId($pdo, $userId);
 }
 
-if(!isset($_SESSION['user_id'])) {
-    header('Location: ./Components/Login/login.php');
-    exit;
-}
-
-$userId = (int) $_SESSION['user_id'];
-
-$profile = getProfileByUserId($pdo, $userId);
-
-if($profile === null) {
+if ($profile === null) {
+    http_response_code(404);
     exit('Profile not found.');
 }
+
+$isOwner = (int) $profile['user_id'] === $userId;
+
 
 require_once __DIR__ . '/Profile.html.php';

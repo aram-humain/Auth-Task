@@ -12,7 +12,7 @@ function getUsers(
         '
     SELECT
         u.id,
-        u.name,
+        prof.first_name,
         u.email,
         u.created_at,
         ev.verified_at,
@@ -24,6 +24,8 @@ function getUsers(
         MIN(r.id) AS role_id
     FROM users u
     
+    LEFT JOIN profiles prof
+        ON prof.user_id = u.id
     LEFT JOIN email_verifications ev
         ON ev.user_id = u.id
     LEFT JOIN user_roles ur
@@ -32,13 +34,13 @@ function getUsers(
         ON r.id = ur.role_id
         
     WHERE (
-        u.name LIKE :search
+        prof.first_name LIKE :search
         OR u.email LIKE :search
     )
     
     GROUP BY
         u.id,
-        u.name,
+        prof.first_name,
         u.email,
         u.created_at,
         ev.verified_at
@@ -60,7 +62,8 @@ function getUsersCount(PDO $pdo, string $search): int
     $stmt = $pdo->prepare('
     SELECT COUNT(*)
     FROM users
-    WHERE name LIKE :search
+    LEFT JOIN profiles ON profiles.user_id = users.id
+    WHERE profiles.first_name LIKE :search
         OR email LIKE :search');
 
     $stmt->execute(['search' => '%' . $search . '%']);

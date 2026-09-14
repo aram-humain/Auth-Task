@@ -19,7 +19,8 @@ function createUser(
     string $lastName,
     string $email,
     string $password,
-    string $token
+    string $token,
+    string $publicSlug
 ): void {
     $ownsTransaction = !$pdo->inTransaction();
 
@@ -46,19 +47,22 @@ function createUser(
             'INSERT INTO profiles (
                 user_id,
                 first_name,
-                last_name
+                last_name,
+                public_slug
             )
             VALUES (
                 :user_id,
                 :first_name,
-                :last_name
+                :last_name,
+                :public_slug
             )'
         );
 
         $profileStatement->execute([
             'user_id' => $userId,
             'first_name' => $firstName,
-            'last_name' => $lastName
+            'last_name' => $lastName,
+            'public_slug' => $publicSlug
         ]);
 
         $roleStatment = $pdo->prepare(
@@ -113,4 +117,18 @@ function createUser(
 
         throw $exception;
     }
+}
+
+function generatePublicSlug(
+    string $firstName,
+    string $lastName
+): string {
+
+    $name = strtolower(trim($firstName . '-' . $lastName));
+    
+    $name = str_replace(' ', '-', $name);
+
+    $uniquePart = bin2hex(random_bytes(5));
+
+    return $name . '-' . $uniquePart;
 }

@@ -82,8 +82,7 @@
                 <p
                     id="success-message"
                     class="success-message"
-                    role="status"
-                >
+                    role="status">
                     <?= htmlspecialchars(
                         $success,
                         ENT_QUOTES,
@@ -187,7 +186,7 @@
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            $user['name'],
+                                            $user['first_name'] ??  '',
                                             ENT_QUOTES,
                                             'UTF-8'
                                         ) ?>

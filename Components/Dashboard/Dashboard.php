@@ -7,7 +7,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
 requireLogin();
 
 $statement = $pdo->prepare(
-    "SELECT 
+    'SELECT 
         users.id,
         users.email, 
         users.created_at,
@@ -18,7 +18,7 @@ $statement = $pdo->prepare(
      LEFT JOIN profiles ON profiles.user_id = users.id
      LEFT JOIN email_verifications ON email_verifications.user_id = users.id
      WHERE users.id = :id
-     LIMIT 1"
+     LIMIT 1'
 );
 
 $statement->execute([

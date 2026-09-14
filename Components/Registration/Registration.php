@@ -38,8 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             $token = bin2hex(random_bytes(32));
+
+            $publicSlug = generatePublicSlug(
+                $firstName,
+                $lastName
+            );
             $pdo->beginTransaction();
-            createUser($pdo, $firstName, $email, $lastName, $password, $token);
+            createUser($pdo, $firstName, $email, $lastName, $password, $token, $publicSlug);
             sendVerificationLinkEmail($email, $firstName, $token);
             $pdo->commit();
 

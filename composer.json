@@ -1,7 +1,8 @@
 {
     "require": {
         "railsware/mailtrap-php": "^3.15",
-        "php-http/guzzle7-adapter": "^1.1"
+        "php-http/guzzle7-adapter": "^1.1",
+        "cloudinary/cloudinary_php": "^3.1"
     },
     "config": {
         "allow-plugins": {
