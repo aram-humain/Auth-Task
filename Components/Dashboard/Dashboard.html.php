@@ -56,7 +56,7 @@
                 Welcome,
                 <strong>
                     <?= htmlspecialchars(
-                        $user['name'],
+                        $user['email'],
                         ENT_QUOTES,
                         'UTF-8'
                     ) ?>
@@ -92,12 +92,12 @@
                 <div class="info-row">
 
                     <span class="info-label">
-                        Name
+                        Full Name
                     </span>
 
                     <span class="info-value">
                         <?= htmlspecialchars(
-                            $user['name'],
+                            $user['first_name'] . ' ' . $user['last_name'],
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>

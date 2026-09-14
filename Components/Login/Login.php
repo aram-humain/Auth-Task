@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../config/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
 require_once __DIR__ . '/LoginVal.php';
 require_once __DIR__ . '/LoginDB.php';
 
@@ -27,12 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $user = findUserByCredentials($pdo, $email, $password);
 
-        if ($user) {
+        if ($user) { 
 
             session_regenerate_id(true);
 
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_email'] = $user['email'];
 
             header('Location: ../Dashboard/Dashboard.php');

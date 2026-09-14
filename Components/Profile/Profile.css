@@ -1,0 +1,150 @@
+/* Container layout using CSS Grid */
+.profile-container {
+    max-width: 1128px;
+    margin: 24px auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+    .profile-container {
+        grid-template-columns: 3fr 1fr;
+    }
+}
+
+/* Base card styling */
+.profile-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+/* Header Banner & Profile Pic arrangements */
+.header-card {
+    position: relative;
+    padding-bottom: 24px;
+}
+
+.profile-banner {
+    height: 200px;
+    background: linear-gradient(135deg, #a0b2c6 0%, #708090 100%);
+    width: 100%;
+}
+
+.avatar-wrapper {
+    position: absolute;
+    top: 120px;
+    left: 24px;
+}
+
+.profile-avatar {
+    width: 152px;
+    height: 152px;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    background-color: #e9e9e9;
+    object-fit: cover;
+}
+
+/* Typography spacing inside header */
+.profile-intro {
+    margin-top: 88px;
+    padding: 0 24px;
+}
+
+.profile-name {
+    font-size: 24px;
+    font-weight: 600;
+    color: #191919;
+    margin-bottom: 8px;
+}
+
+.profile-meta {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.7);
+    margin-top: 4px;
+}
+
+/* Action Buttons */
+.profile-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.btn {
+    padding: 6px 16px;
+    border-radius: 24px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #0a66c2;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #004182;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: #0a66c2;
+    border: 1px solid #0a66c2;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(10, 102, 194, 0.1);
+}
+
+/* Content block styling (About box) */
+.content-card {
+    padding: 24px;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.9);
+    margin-bottom: 12px;
+}
+
+.card-body {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.9);
+}
+
+/* Sidebar context specific items */
+.sidebar-card {
+    padding: 16px;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.9);
+    margin-bottom: 12px;
+}
+
+.sidebar-body {
+    font-size: 14px;
+}
+
+.contact-item a {
+    color: #0a66c2;
+    text-decoration: none;
+}
+
+.contact-item a:hover {
+    text-decoration: underline;
+}

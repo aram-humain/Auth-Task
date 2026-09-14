@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $lastName = trim($_POST['last_name'] ?? '');
 
-    $errors = validateRegistrationInput($firstName, $email, $password, $lastName);
+    $errors = validateRegistrationInput($firstName, $lastName, $email, $password);
 
     if (empty($errors)) {
         if (emailAlreadyExists($pdo, $email)) {
