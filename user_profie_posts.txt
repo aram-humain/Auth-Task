@@ -201,4 +201,5 @@ scenario for picture
 Добавить Company, Position, Location, Start Date, End Date, Description.
 Показать Work Experience внутри Profile.
 Сделать Add / Edit / Delete Experience только владельцу.
-В конце пройти полный flow от Register до просмотра Profile, Posts, Skills и Work Experience.
+Notification system (about like, connection, comments/reply, messages in DM)
+В конце пройти полный flow от Register до просмотра Profile, Posts, Skills, Notification и Work Experience.
