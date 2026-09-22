@@ -203,3 +203,318 @@ scenario for picture
 Сделать Add / Edit / Delete Experience только владельцу.
 Notification system (about like, connection, comments/reply, messages in DM)
 В конце пройти полный flow от Register до просмотра Profile, Posts, Skills, Notification и Work Experience.
+
+
+======================================================================
+POSTS / SOCIAL NETWORK IMPLEMENTATION HANDOFF
+======================================================================
+
+This section records the database design agreed for the pilot social
+network and the work that remains. No application code has been
+implemented for these social features yet.
+
+
+1. AGREED ARCHITECTURE
+----------------------------------------------------------------------
+
+The application uses:
+
+- PHP
+- PDO
+- MySQL 8.0
+- InnoDB
+- Session authentication through includes/auth.php
+- Cloudinary for uploaded images
+- The existing Dashboard as the feed page
+
+There will not be a separate Feed component for now. Dashboard.php will
+load the feed data and Dashboard.html.php will render it.
+
+Visibility decision:
+
+- Authenticated users may view posts.
+- Only the post owner may edit or delete their post.
+- Authorized moderators/admins may moderate posts and reports.
+- Frontend button visibility is never an authorization mechanism.
+
+
+2. TABLES CREATED
+----------------------------------------------------------------------
+
+Existing tables:
+
+- users
+- profiles
+
+Social tables:
+
+- posts
+- connections
+- follows
+- post_likes
+- saved_posts
+- comments
+- post_reports
+
+Main relationships:
+
+users 1 -> many posts
+users 1 -> many comments
+users 1 -> many post_likes
+users 1 -> many saved_posts
+users 1 -> many post_reports
+users many -> many users through connections
+users many -> many users through follows
+posts 1 -> many comments
+posts 1 -> many post_likes
+posts 1 -> many saved_posts
+posts 1 -> many post_reports
+
+
+3. TABLE RESPONSIBILITIES
+----------------------------------------------------------------------
+
+posts
+
+- Internal primary key: BIGINT UNSIGNED id
+- Public identifier: BINARY(16) public_id
+- Author reference: user_id -> users.id
+- Post text: content
+- Optional Cloudinary image reference: image_public_id
+- created_at and updated_at timestamps
+- deleted_at for soft deletion
+- public_id is unique
+- A post must contain text, an image, or both
+
+The public_id is used at the URL/API boundary. Related tables should
+reference the internal posts.id for efficient joins.
+
+connections
+
+- Stores connection requests and accepted connections
+- Stores users as user_low_id and user_high_id
+- Stores requested_by and status
+- Status values: pending, accepted, rejected
+- A unique user pair prevents A -> B and B -> A being separate rows
+- user_low_id must be lower than user_high_id
+
+follows
+
+- Stores follower_user_id and followed_user_id
+- Unique pair prevents duplicate follows
+- A user cannot follow themselves
+- Following is independent from connecting
+
+post_likes
+
+- Stores post_id and user_id
+- Composite primary key prevents duplicate likes
+- Removing a like deletes the relationship row
+
+saved_posts
+
+- Stores post_id and user_id
+- Composite primary key prevents duplicate saves
+- Removing a save deletes the relationship row
+
+comments
+
+- Stores post_id, user_id, and content
+- Stores created_at, updated_at, and deleted_at
+- First version supports normal comments only, not nested replies
+- Comment authors may edit/delete their own comments
+- Moderators may remove comments
+
+post_reports
+
+- Stores post_id and reporter_user_id
+- Stores reason, optional description, and status
+- Status values: pending, reviewed, dismissed, action_taken
+- Unique post/reporter pair prevents duplicate reports
+- reviewed_by and reviewed_at are set by moderation actions
+- The reviewer-fields rule is enforced by backend logic because MySQL
+	does not allow that CHECK constraint with the reviewer foreign key's
+	ON DELETE SET NULL action
+
+
+4. IDENTIFIER DECISION
+----------------------------------------------------------------------
+
+The project uses ramsey/uuid 4.9.4, installed through Composer.
+
+composer.json and composer.lock were updated, and vendor/autoload.php
+was regenerated.
+
+Generate a public post ID with:
+
+use Ramsey\\Uuid\\Uuid;
+
+$publicId = Uuid::uuid7()->getBytes();
+
+UUIDv7 is time-ordered and stored in 16 bytes in the BINARY(16) column.
+It makes simple ID enumeration difficult, but it is not authorization.
+Every backend operation must still authenticate the user and verify
+visibility, ownership, or permission.
+
+
+5. DATABASE VERIFICATION
+----------------------------------------------------------------------
+
+Run these queries in MySQL:
+
+SHOW TABLES;
+
+DESCRIBE posts;
+DESCRIBE connections;
+DESCRIBE follows;
+DESCRIBE post_likes;
+DESCRIBE saved_posts;
+DESCRIBE comments;
+DESCRIBE post_reports;
+
+Verify the foreign keys:
+
+SELECT
+		TABLE_NAME,
+		CONSTRAINT_NAME,
+		COLUMN_NAME,
+		REFERENCED_TABLE_NAME,
+		REFERENCED_COLUMN_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = DATABASE()
+	AND TABLE_NAME IN (
+			'posts',
+			'connections',
+			'follows',
+			'post_likes',
+			'saved_posts',
+			'comments',
+			'post_reports'
+	)
+	AND REFERENCED_TABLE_NAME IS NOT NULL
+ORDER BY TABLE_NAME, CONSTRAINT_NAME;
+
+Verify the UUID column specifically:
+
+SHOW COLUMNS FROM posts LIKE 'public_id';
+
+Expected type: binary(16).
+
+
+6. SECURITY RULES
+----------------------------------------------------------------------
+
+Backend:
+
+- Require login for post and social actions.
+- Use prepared PDO statements for all user input.
+- Use the authenticated session user ID, never a submitted author ID.
+- Check post ownership in UPDATE and DELETE conditions.
+- Check comment ownership before editing/deleting comments.
+- Check moderator permission before changing reports.
+- Validate that a connection requester is one of the two users.
+- Validate upload MIME type, size, dimensions, and file contents.
+- Store Cloudinary references, not uploaded binary data in MySQL.
+- Use CSRF protection on every state-changing POST request.
+- Validate and escape output when rendering HTML.
+
+Database:
+
+- Foreign keys protect references.
+- Unique keys prevent duplicate likes, saves, follows, connections,
+	and reports.
+- CHECK constraints validate statuses and non-empty text where used.
+- ON DELETE CASCADE removes dependent interaction records when a user
+	or post is permanently deleted.
+
+Frontend:
+
+- Display Connect, Pending, or the overflow menu based on backend state.
+- Display Follow/Unfollow based on the separate follows state.
+- Display Save/Unsave based on the saved_posts state.
+- Never rely on hidden buttons for security.
+
+
+7. WORK STILL REQUIRED
+----------------------------------------------------------------------
+
+Recommended implementation order:
+
+1. Implement UUIDv7 post creation using ramsey/uuid.
+2. Add CSRF validation to post creation.
+3. Build the create-post form in the existing Posts area or Dashboard.
+4. Validate post text and optional Cloudinary image upload.
+5. Insert posts using the authenticated user_id.
+6. Load the Dashboard feed with author/profile data.
+7. Add post ownership checks for edit and soft delete.
+8. Add post likes and unlike actions.
+9. Add saved-post and unsave actions.
+10. Add comments, editing, and deletion.
+11. Add connection request, Pending, accept, and reject behavior.
+12. Add follow and unfollow behavior.
+13. Add the three-dot post menu.
+14. Add Share via using the public post URL/browser sharing.
+15. Add post reporting and moderator review.
+16. Add focused tests for every authorization and duplicate-action case.
+
+
+8. DASHBOARD FEED DATA
+----------------------------------------------------------------------
+
+Each Dashboard post will eventually provide:
+
+- public post ID
+- author user ID
+- author first name and last name
+- author profile picture from profiles
+- creation date
+- content
+- Cloudinary image reference, if present
+- connection status with the current user
+- follow status with the current user
+- saved state with the current user
+- liked state with the current user
+- likes count
+- comments count
+
+Counts come from post_likes and comments. They are not stored as the
+source of truth in posts.
+
+
+9. TEST CHECKLIST
+----------------------------------------------------------------------
+
+Database:
+
+- Foreign keys reject nonexistent users and posts.
+- Duplicate likes are rejected.
+- Duplicate saves are rejected.
+- Duplicate follows are rejected.
+- Reverse duplicate connections are rejected.
+- Duplicate reports are rejected.
+- Self-follow and self-connection are rejected.
+
+Authorization:
+
+- Unauthenticated users cannot create or modify posts.
+- Users cannot edit another user's post.
+- Users cannot delete another user's post.
+- Users cannot edit another user's comment.
+- Users cannot review reports without moderator permission.
+- Random or guessed public IDs do not bypass authorization.
+
+Features:
+
+- Create text-only post.
+- Create image-only post if supported by the posts CHECK constraint.
+- Create text and image post.
+- Edit owned post.
+- Soft-delete owned post.
+- Like and unlike.
+- Save and unsave.
+- Create, edit, and delete comments.
+- Connect, show Pending, accept, and reject.
+- Follow and unfollow independently from connections.
+- Report a post.
+- Review, dismiss, or take action on a report.
+- Share a public post URL without creating a share table.
