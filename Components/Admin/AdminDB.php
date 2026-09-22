@@ -151,7 +151,7 @@ function logAudit(
 
 function getAuditLogs(PDO $pdo): array
 {
-    $stmt = $pdo->query(
+    $stmt = $pdo->prepare(
         'SELECT
         al.id,
         al.action,
