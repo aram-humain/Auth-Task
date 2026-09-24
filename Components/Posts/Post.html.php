@@ -8,6 +8,10 @@
 /** @var bool $isOwner */
 /** @var bool $isAdmin */
 /** @var string $csrfToken */
+/** @var int $viewerUserId */
+/** @var bool $canComment */
+/** @var array $comments */
+
 
 ?>
 

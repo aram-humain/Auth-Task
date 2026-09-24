@@ -975,11 +975,11 @@ Features:
 | Newest / liked / commented sorting             | ✅                               |
 | Pagination + сохранение GET filters            | ✅                               |
 | Like/comment counts в feed                     | ✅ только отображение            |
-| Posts пользователя внутри Profile              | ❌                               |
-| Author name → Profile                          | ❌ имя сейчас обычный `<div>`    |
-| Edit own Post                                  | ❌                               |
-| Change draft/published/archived после создания | ❌                               |
-| Delete own Post                                | ❌                               |
+| Posts пользователя внутри Profile              | ✅                               |
+| Author name → Profile                          | ✅     |
+| Edit own Post                                  | ✅                               |
+| Change draft/published/archived после создания | ✅                               |
+| Delete own Post                                | ✅                               |
 | Guest feed                                     | ❌                               |
 | Admin Category CRUD                            | ❌                               |
 | Like / Unlike                                  | ❌                               |
@@ -987,7 +987,7 @@ Features:
 | Edit/Delete comment                            | ❌                               |
 | Nested replies                                 | ❌                               |
 | Soft-delete actions                            | ❌                               |
-| Admin restore deleted posts                    | ❌                               |
+| Admin restore deleted posts                    | ✅                               |
 | Reports                                        | ❌                               |
 | Moderation page for reports                    | ❌                               |
 | Comment 5/min limit                            | ❌                               |
