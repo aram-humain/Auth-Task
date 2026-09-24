@@ -115,7 +115,7 @@ function processPostTags(PDO $pdo, int $postId, string $tagsInput): void
             throw new RuntimeException('Tag name is too long, maximal length -> 100');
         }
 
-        $normalizedTags = $tag;
+        $normalizedTags[] = $tag;
     }
 
     $normalizedTags = array_unique($normalizedTags);
@@ -287,7 +287,8 @@ function countFeedPosts(
     PDO $pdo,
     string $search = '',
     ?int $categoryId = null,
-    ?int $tagId = null
+    ?int $tagId = null,
+    ?int $authorId = null
 ): int {
     $sql = "
         SELECT COUNT(*)
@@ -336,6 +337,14 @@ function countFeedPosts(
         $params['tag_id'] = $tagId;
     }
 
+    if ($authorId !== null) {
+        $sql .= "
+        AND p.user_id = :author_id
+    ";
+
+        $params['author_id'] = $authorId;
+    }
+
     $statement = $pdo->prepare($sql);
 
     $statement->execute($params);
@@ -350,7 +359,8 @@ function getFeedPosts(
     string $search = '',
     ?int $categoryId = null,
     string $sort = 'newest',
-    ?int $tagId = null
+    ?int $tagId = null,
+    ?int $authorId = null
 ): array {
     $sql = "
         SELECT
@@ -430,10 +440,16 @@ function getFeedPosts(
         ";
     }
 
+    if ($authorId !== null) {
+        $sql .= "
+            AND p.user_id = :author_id
+        ";
+    }
+
     $orderBy = match ($sort) {
-    'liked' => 'likes_count DESC, p.created_at DESC',
-    'commented' => 'comments_count DESC, p.created_at DESC',
-    default => 'p.created_at DESC'
+        'liked' => 'likes_count DESC, p.created_at DESC',
+        'commented' => 'comments_count DESC, p.created_at DESC',
+        default => 'p.created_at DESC'
     };
 
 
@@ -445,6 +461,14 @@ function getFeedPosts(
     ";
 
     $statement = $pdo->prepare($sql);
+
+    if ($authorId !== null) {
+        $statement->bindValue(
+            ':author_id',
+            $authorId,
+            PDO::PARAM_INT
+        );
+    }
 
     if ($tagId !== null) {
         $statement->bindValue(
@@ -599,4 +623,69 @@ function tagExists(PDO $pdo, int $tagId): bool
     $statement->execute(['id' => $tagId]);
 
     return (bool) $statement->fetchColumn();
+}
+
+function feedAuthorExists(PDO $pdo, string $publicSlug): bool
+{
+    $statement = $pdo->prepare(
+        "SELECT 1
+         FROM profiles pr
+         JOIN posts p
+             ON p.user_id = pr.user_id
+         WHERE pr.public_slug = :public_slug
+           AND p.status = 'published'
+           AND p.deleted_at IS NULL
+         LIMIT 1"
+    );
+
+    $statement->execute([
+        'public_slug' => $publicSlug
+    ]);
+
+    return (bool) $statement->fetchColumn();
+}
+
+function getFeedAuthorIdBySlug(
+    PDO $pdo,
+    string $publicSlug
+): ?int {
+    $statement = $pdo->prepare(
+        "SELECT user_id
+         FROM profiles
+         WHERE public_slug = :public_slug
+         LIMIT 1"
+    );
+
+    $statement->execute([
+        'public_slug' => $publicSlug
+    ]);
+
+    $userId = $statement->fetchColumn();
+
+    return $userId === false
+        ? null
+        : (int) $userId;
+}
+
+function getFeedAuthors(PDO $pdo): array
+{
+    $statement = $pdo->query(
+        "SELECT DISTINCT
+        pr.user_id,
+        pr.first_name,
+        pr.last_name,
+        pr.public_slug
+        
+        FROM profiles pr
+        
+        JOIN posts p
+         ON p.user_id = pr.user_id
+         
+         WHERE p.status = 'published'
+         AND p.deleted_at IS NULL
+         
+        ORDER BY pr.first_name, pr.last_name"
+    );
+
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
 }

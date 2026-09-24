@@ -7,7 +7,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 
 use Ramsey\Uuid\Uuid;
 
-$perPage = 10;
+$perPage = 6;
 
 $page = filter_input(
     INPUT_GET,
@@ -91,11 +91,30 @@ if (
 
 $tags = getAllTags($pdo);
 
+
+$authorSlug = trim($_GET['author'] ?? '');
+
+$authorId = null;
+
+if ($authorSlug !== '') {
+    if (!feedAuthorExists($pdo, $authorSlug)) {
+        $authorSlug = '';
+    } else {
+        $authorId = getFeedAuthorIdBySlug(
+            $pdo,
+            $authorSlug
+        );
+    }
+}
+
+$authors = getFeedAuthors($pdo);
+
 $totalPosts = countFeedPosts(
     $pdo,
     $search,
     $categoryId,
-    $tagId
+    $tagId,
+    $authorId
 );
 
 $totalPages = max(
@@ -116,7 +135,8 @@ $posts = getFeedPosts(
     $search,
     $categoryId,
     $sort,
-    $tagId
+    $tagId,
+    $authorId
 );
 
 $postIds = array_map(

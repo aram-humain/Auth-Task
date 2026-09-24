@@ -1,20 +1,21 @@
 <?php
 
-/** @var array<int, array<string, mixed>> $posts */
-/** @var array<int, array<string, mixed>> $categories */
-/** @var array<int, array<string, mixed>> $tags */
-/** @var int|null $currentUserId */
+/** @var array $posts */
+/** @var array $categories */
+/** @var array $tags */
+/** @var array $authors */
+/** @var string $search */
 /** @var int|null $categoryId */
 /** @var int|null $tagId */
+/** @var string|null $authorSlug */
+/** @var string $sort */
 /** @var int $page */
 /** @var int $totalPages */
-/** @var string $search */
-/** @var string $sort */
+/** @var array $imagesByPost */
 
 ?>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -29,11 +30,11 @@
 
     <link
         rel="stylesheet"
-        href="/assets/css/theme.css">
+        href="/Components/Posts/Posts.css">
 
     <link
         rel="stylesheet"
-        href="/Components/Posts/Posts.css">
+        href="/assets/css/theme.css">
 
     <script
         src="/assets/js/theme.js"
@@ -44,84 +45,76 @@
 
 <body>
 
-
-    <button
-        type="button"
-        id="theme-toggle"
-        class="theme-toggle">
-
-        Theme
-
-    </button>
+<button
+    type="button"
+    id="theme-toggle"
+    class="theme-toggle">
+    Theme
+</button>
 
 
-    <main class="feed-container">
+<main class="posts-container">
 
 
-        <!-- HEADER -->
+    <!-- HEADER -->
 
-        <header class="feed-header">
+    <header class="posts-header">
 
-            <div>
+        <div>
 
-                <h1>Posts</h1>
+            <h1>Posts</h1>
 
-                <p>
-                    Latest posts from the community.
-                </p>
+            <p>
+                Latest posts from the community.
+            </p>
 
-            </div>
-
-
-            <?php if ($currentUserId !== null): ?>
-
-                <a
-                    href="/Components/Posts/CreatePost.php"
-                    class="create-post-button">
-
-                    Create Post
-
-                </a>
-
-            <?php endif; ?>
-
-        </header>
+        </div>
 
 
+        <a
+            href="/Components/Posts/CreatePosts.php"
+            class="create-post-button">
+            Create Post
+        </a>
 
-        <!-- FILTERS -->
+    </header>
+
+
+    <!-- FILTERS -->
+
+    <section class="posts-filters">
 
         <form
             method="GET"
             action="/Components/Posts/Posts.php"
-            class="feed-search">
+            class="posts-filter-form">
 
 
             <!-- SEARCH -->
 
-            <div class="feed-search-field">
+            <div class="filter-group">
 
-                <label for="feed-search">
+                <label for="search">
                     Search
                 </label>
 
                 <input
                     type="search"
-                    id="feed-search"
+                    id="search"
                     name="q"
-                    placeholder="Search posts..."
                     value="<?= htmlspecialchars(
-                                $search,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>">
+                        $search,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                    placeholder="Search posts...">
 
             </div>
 
 
             <!-- CATEGORY -->
 
-            <div class="feed-search-field">
+            <div class="filter-group">
 
                 <label for="category_id">
                     Category
@@ -139,9 +132,10 @@
 
                         <option
                             value="<?= (int) $category['id'] ?>"
-                            <?= $categoryId === (int) $category['id']
-                                ? 'selected'
-                                : '' ?>>
+                            <?= $categoryId !== null
+                                && (int) $categoryId === (int) $category['id']
+                                    ? 'selected'
+                                    : '' ?>>
 
                             <?= htmlspecialchars(
                                 $category['name'],
@@ -160,7 +154,7 @@
 
             <!-- TAG -->
 
-            <div class="feed-search-field">
+            <div class="filter-group">
 
                 <label for="tag_id">
                     Tag
@@ -178,15 +172,74 @@
 
                         <option
                             value="<?= (int) $tag['id'] ?>"
-                            <?= $tagId === (int) $tag['id']
-                                ? 'selected'
-                                : '' ?>>
+                            <?= $tagId !== null
+                                && (int) $tagId === (int) $tag['id']
+                                    ? 'selected'
+                                    : '' ?>>
 
                             #<?= htmlspecialchars(
-                                    $tag['name'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
+                                $tag['name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
+                        </option>
+
+                    <?php endforeach; ?>
+
+                </select>
+
+            </div>
+
+
+            <!-- AUTHOR -->
+
+            <div class="filter-group">
+
+                <label for="author">
+                    Author
+                </label>
+
+                <select
+                    id="author"
+                    name="author">
+
+                    <option value="">
+                        All authors
+                    </option>
+
+                    <?php foreach ($authors as $author): ?>
+
+                        <?php
+
+                        $authorName = trim(
+                            ($author['first_name'] ?? '')
+                            . ' '
+                            . ($author['last_name'] ?? '')
+                        );
+
+                        if ($authorName === '') {
+                            $authorName = 'User';
+                        }
+
+                        ?>
+
+                        <option
+                            value="<?= htmlspecialchars(
+                                $author['public_slug'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            <?= $authorSlug !== null
+                                && $authorSlug === $author['public_slug']
+                                    ? 'selected'
+                                    : '' ?>>
+
+                            <?= htmlspecialchars(
+                                $authorName,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
 
                         </option>
 
@@ -199,10 +252,10 @@
 
             <!-- SORT -->
 
-            <div class="feed-search-field">
+            <div class="filter-group">
 
                 <label for="sort">
-                    Sort by
+                    Sort
                 </label>
 
                 <select
@@ -246,99 +299,135 @@
 
             <!-- ACTIONS -->
 
-            <div class="feed-search-actions">
+            <div class="filter-actions">
 
                 <button
                     type="submit"
-                    class="feed-search-button">
+                    class="filter-button">
 
                     Search
 
                 </button>
 
 
-                <?php if (
-                    $search !== ''
-                    || $categoryId !== null
-                    || $tagId !== null
-                    || $sort !== 'newest'
-                ): ?>
+                <a
+                    href="/Components/Posts/Posts.php"
+                    class="filter-clear-button">
 
-                    <a
-                        href="/Components/Posts/Posts.php"
-                        class="feed-clear-button">
+                    Clear
 
-                        Clear
-
-                    </a>
-
-                <?php endif; ?>
+                </a>
 
             </div>
 
-
         </form>
 
+    </section>
 
 
-        <!-- EMPTY -->
+    <!-- POSTS -->
 
-        <?php if (empty($posts)): ?>
+    <?php if (empty($posts)): ?>
 
-            <section class="empty-feed">
+        <section class="empty-posts">
 
-                <h2>No posts found</h2>
+            <h2>
+                No posts found
+            </h2>
 
-                <p>
-                    No published posts match your filters.
-                </p>
+            <p>
+                No published posts match your current filters.
+            </p>
 
-            </section>
+        </section>
 
-        <?php endif; ?>
+    <?php else: ?>
 
-
-
-        <!-- POSTS -->
-
-        <section class="feed-list">
+        <section class="posts-list">
 
 
             <?php foreach ($posts as $post): ?>
 
-                <article class="feed-post">
+                <?php
+
+                $postUuid = '';
+
+                if (
+                    isset($post['public_id'])
+                    && $post['public_id'] !== null
+                ) {
+
+                    try {
+
+                        $postUuid =
+                            \Ramsey\Uuid\Uuid::fromBytes(
+                                $post['public_id']
+                            )->toString();
+
+                    } catch (\Throwable $e) {
+
+                        $postUuid = '';
+
+                    }
+                }
+
+
+                $authorName = trim(
+                    ($post['first_name'] ?? '')
+                    . ' '
+                    . ($post['last_name'] ?? '')
+                );
+
+                if ($authorName === '') {
+                    $authorName = 'User';
+                }
+
+                ?>
+
+
+                <article class="post-card">
 
 
                     <!-- AUTHOR -->
 
-                    <header class="feed-post-header">
+                    <div class="post-card-header">
 
-                        <div class="author-info">
+                        <div class="post-author">
 
-
-                            <?php if (
-                                !empty($post['profile_picture'])
-                            ): ?>
+                            <?php if (!empty($post['profile_picture'])): ?>
 
                                 <img
-                                    class="author-avatar"
                                     src="<?= htmlspecialchars(
-                                                $post['profile_picture'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>"
-                                    alt="Profile picture">
+                                        $post['profile_picture'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    alt=""
+                                    class="post-avatar">
 
-                            <?php else: ?>
+                            <?php endif; ?>
 
-                                <div class="author-avatar-placeholder">
+
+                            <div>
+
+                                <div class="post-author-name">
 
                                     <?= htmlspecialchars(
-                                        strtoupper(
-                                            mb_substr(
-                                                $post['author_name'],
-                                                0,
-                                                1
+                                        $authorName,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+
+                                </div>
+
+
+                                <div class="post-date">
+
+                                    <?= htmlspecialchars(
+                                        date(
+                                            'd M Y, H:i',
+                                            strtotime(
+                                                $post['created_at']
                                             )
                                         ),
                                         ENT_QUOTES,
@@ -347,79 +436,46 @@
 
                                 </div>
 
-                            <?php endif; ?>
-
-
-                            <div>
-
-                                <a
-                                    href="/Components/Profile/Profile.php?slug=<?= urlencode(
-                                                                                    $post['public_slug']
-                                                                                ) ?>"
-                                    class="author-name">
-
-                                    <?= htmlspecialchars(
-                                        $post['author_name'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
-
-                                </a>
-
-
-                                <div class="post-meta">
-
-                                    <span>
-
-                                        <?= htmlspecialchars(
-                                            $post['category_name'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-
-                                    </span>
-
-                                    <span>·</span>
-
-                                    <time
-                                        datetime="<?= htmlspecialchars(
-                                                        $post['created_at'],
-                                                        ENT_QUOTES,
-                                                        'UTF-8'
-                                                    ) ?>">
-
-                                        <?= htmlspecialchars(
-                                            date(
-                                                'd M Y, H:i',
-                                                strtotime(
-                                                    $post['created_at']
-                                                )
-                                            ),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-
-                                    </time>
-
-                                </div>
-
                             </div>
 
                         </div>
 
-                    </header>
+
+                        <!-- CATEGORY -->
+
+                        <span class="post-category">
+
+                            <?= htmlspecialchars(
+                                $post['category_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
+                        </span>
+
+                    </div>
 
 
+                    <!-- TITLE -->
 
-                    <!-- TITLE + CONTENT -->
+                    <h2 class="post-title">
 
-                    <a
-                        href="/Components/Posts/Post.php?id=<?= urlencode(
-                                                                $post['uuid']
-                                                            ) ?>"
-                        class="post-main-link">
+                        <?php if ($postUuid !== ''): ?>
 
-                        <h2>
+                            <a
+                                href="/Components/Posts/Post.php?id=<?= urlencode(
+                                    $postUuid
+                                ) ?>">
+
+                                <?= htmlspecialchars(
+                                    $post['title'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </a>
+
+                        <?php else: ?>
 
                             <?= htmlspecialchars(
                                 $post['title'],
@@ -427,103 +483,110 @@
                                 'UTF-8'
                             ) ?>
 
-                        </h2>
-
-
-                        <?php if (
-                            trim($post['content']) !== ''
-                        ): ?>
-
-                            <?php
-
-                            $content = $post['content'];
-
-                            if (mb_strlen($content) > 300) {
-                                $content =
-                                    mb_substr(
-                                        $content,
-                                        0,
-                                        300
-                                    )
-                                    . '...';
-                            }
-
-                            ?>
-
-                            <p class="post-preview">
-
-                                <?= nl2br(
-                                    htmlspecialchars(
-                                        $content,
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    )
-                                ) ?>
-
-                            </p>
-
                         <?php endif; ?>
 
-                    </a>
+                    </h2>
 
 
+                    <!-- CONTENT -->
 
-                    <!-- IMAGES -->
+                    <?php if (
+                        trim(
+                            $post['content'] ?? ''
+                        ) !== ''
+                    ): ?>
 
-                    <?php if (!empty($post['images'])): ?>
+                        <div class="post-excerpt">
+
+                            <?= nl2br(
+                                htmlspecialchars(
+                                    mb_substr(
+                                        $post['content'],
+                                        0,
+                                        300
+                                    ),
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                )
+                            ) ?>
+
+
+                            <?php if (
+                                mb_strlen(
+                                    $post['content']
+                                ) > 300
+                            ): ?>
+
+                                ...
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    <?php endif; ?>
+
+
+                    <!-- IMAGE -->
+
+                    <?php
+
+                    $postImages =
+                        $imagesByPost[
+                            (int) $post['id']
+                        ] ?? [];
+
+                    ?>
+
+
+                    <?php if (!empty($postImages)): ?>
+
+                        <?php $firstImage = $postImages[0]; ?>
 
                         <a
                             href="/Components/Posts/Post.php?id=<?= urlencode(
-                                                                    $post['uuid']
-                                                                ) ?>"
-                            class="feed-images <?= count($post['images']) > 1
-                                                    ? 'feed-images-multiple'
-                                                    : '' ?>">
+                                $postUuid
+                            ) ?>"
+                            class="post-image-wrapper">
 
-                            <?php foreach (
-                                array_slice(
-                                    $post['images'],
-                                    0,
-                                    4
-                                ) as $image
-                            ): ?>
-
-                                <div class="feed-image">
-
-                                    <img
-                                        src="<?= htmlspecialchars(
-                                                    $image['image_url'],
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>"
-                                        alt="Post image"
-                                        loading="lazy">
-
-                                </div>
-
-                            <?php endforeach; ?>
+                            <img
+                                src="<?= htmlspecialchars(
+                                    $firstImage['image_url'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                                alt="Post image"
+                                loading="lazy"
+                                class="post-image">
 
                         </a>
 
                     <?php endif; ?>
 
 
-
                     <!-- TAGS -->
 
-                    <?php if (!empty($post['tags'])): ?>
+                    <?php
 
-                        <div class="feed-tags">
+                    $postTags =
+                        $tagsByPost[
+                            (int) $post['id']
+                        ] ?? [];
 
-                            <?php foreach ($post['tags'] as $tag): ?>
+                    ?>
 
-                                <span class="feed-tag">
+                    <?php if (!empty($postTags)): ?>
+
+                        <div class="post-tags">
+
+                            <?php foreach ($postTags as $tag): ?>
+
+                                <span class="post-tag">
 
                                     #<?= htmlspecialchars(
-                                            $tag['name'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
+                                        $tag['name'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
 
                                 </span>
 
@@ -534,40 +597,44 @@
                     <?php endif; ?>
 
 
-
                     <!-- FOOTER -->
 
-                    <footer class="feed-post-footer">
-
-                        <div class="post-stat">
-
-                            <span>Likes</span>
-
-                            <strong>
-                                <?= (int) $post['likes_count'] ?>
-                            </strong>
-
-                        </div>
+                    <footer class="post-card-footer">
 
 
-                        <div class="post-stat">
+                        <div class="post-stats">
 
-                            <span>Comments</span>
+                            <span>
 
-                            <strong>
-                                <?= (int) $post['comments_count'] ?>
-                            </strong>
+                                ♥
+
+                                <?= (int) (
+                                    $post['likes_count'] ?? 0
+                                ) ?>
+
+                            </span>
+
+
+                            <span>
+
+                                💬
+
+                                <?= (int) (
+                                    $post['comments_count'] ?? 0
+                                ) ?>
+
+                            </span>
 
                         </div>
 
 
                         <a
                             href="/Components/Posts/Post.php?id=<?= urlencode(
-                                                                    $post['uuid']
-                                                                ) ?>"
-                            class="open-post-button">
+                                $postUuid
+                            ) ?>"
+                            class="read-post-button">
 
-                            Open post
+                            Read post
 
                         </a>
 
@@ -578,104 +645,226 @@
 
             <?php endforeach; ?>
 
-
         </section>
-
 
 
         <!-- PAGINATION -->
 
         <?php if ($totalPages > 1): ?>
 
-            <?php
-
-            $paginationParams = [];
-
-            if ($search !== '') {
-                $paginationParams['q'] = $search;
-            }
-
-            if ($categoryId !== null) {
-                $paginationParams['category_id'] =
-                    $categoryId;
-            }
-
-            if ($tagId !== null) {
-                $paginationParams['tag_id'] =
-                    $tagId;
-            }
-
-            if ($sort !== 'newest') {
-                $paginationParams['sort'] =
-                    $sort;
-            }
-
-            ?>
+            <nav
+                class="pagination"
+                aria-label="Posts pagination">
 
 
-            <nav class="pagination">
+                <?php
 
+                $buildPageUrl = function (
+                    int $targetPage
+                ) use (
+                    $search,
+                    $categoryId,
+                    $tagId,
+                    $authorSlug,
+                    $sort
+                ): string {
+
+                    $params = [
+                        'page' => $targetPage
+                    ];
+
+
+                    if ($search !== '') {
+
+                        $params['q'] = $search;
+
+                    }
+
+
+                    if ($categoryId !== null) {
+
+                        $params['category_id'] =
+                            $categoryId;
+
+                    }
+
+
+                    if ($tagId !== null) {
+
+                        $params['tag_id'] =
+                            $tagId;
+
+                    }
+
+
+                    if ($authorSlug !== null) {
+
+                        $params['author'] =
+                            $authorSlug;
+
+                    }
+
+
+                    if ($sort !== 'newest') {
+
+                        $params['sort'] =
+                            $sort;
+
+                    }
+
+
+                    return '/Components/Posts/Posts.php?'
+                        . http_build_query($params);
+                };
+
+                ?>
+
+
+                <!-- PREVIOUS -->
 
                 <?php if ($page > 1): ?>
 
-                    <?php
-
-                    $previousParams =
-                        $paginationParams;
-
-                    $previousParams['page'] =
-                        $page - 1;
-
-                    ?>
-
                     <a
-                        href="?<?= htmlspecialchars(
-                                    http_build_query(
-                                        $previousParams
-                                    ),
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
+                        href="<?= htmlspecialchars(
+                            $buildPageUrl($page - 1),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
                         class="pagination-button">
 
-                        Previous
+                        ← Previous
 
                     </a>
 
                 <?php endif; ?>
 
 
-                <span class="pagination-info">
+                <!-- PAGE NUMBERS -->
 
-                    Page <?= (int) $page ?>
-                    of <?= (int) $totalPages ?>
-
-                </span>
-
-
-                <?php if ($page < $totalPages): ?>
+                <div class="pagination-pages">
 
                     <?php
 
-                    $nextParams =
-                        $paginationParams;
+                    $startPage = max(
+                        1,
+                        $page - 2
+                    );
 
-                    $nextParams['page'] =
-                        $page + 1;
+                    $endPage = min(
+                        $totalPages,
+                        $page + 2
+                    );
 
                     ?>
 
-                    <a
-                        href="?<?= htmlspecialchars(
-                                    http_build_query(
-                                        $nextParams
+
+                    <?php if ($startPage > 1): ?>
+
+                        <a
+                            href="<?= htmlspecialchars(
+                                $buildPageUrl(1),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            class="pagination-page">
+
+                            1
+
+                        </a>
+
+
+                        <?php if ($startPage > 2): ?>
+
+                            <span class="pagination-dots">
+                                ...
+                            </span>
+
+                        <?php endif; ?>
+
+                    <?php endif; ?>
+
+
+                    <?php for (
+                        $pageNumber = $startPage;
+                        $pageNumber <= $endPage;
+                        $pageNumber++
+                    ): ?>
+
+                        <?php if ($pageNumber === $page): ?>
+
+                            <span
+                                class="pagination-page active">
+
+                                <?= $pageNumber ?>
+
+                            </span>
+
+                        <?php else: ?>
+
+                            <a
+                                href="<?= htmlspecialchars(
+                                    $buildPageUrl(
+                                        $pageNumber
                                     ),
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>"
+                                class="pagination-page">
+
+                                <?= $pageNumber ?>
+
+                            </a>
+
+                        <?php endif; ?>
+
+                    <?php endfor; ?>
+
+
+                    <?php if ($endPage < $totalPages): ?>
+
+                        <?php if (
+                            $endPage < $totalPages - 1
+                        ): ?>
+
+                            <span class="pagination-dots">
+                                ...
+                            </span>
+
+                        <?php endif; ?>
+
+
+                        <a
+                            href="<?= htmlspecialchars(
+                                $buildPageUrl(
+                                    $totalPages
+                                ),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            class="pagination-page">
+
+                            <?= $totalPages ?>
+
+                        </a>
+
+                    <?php endif; ?>
+
+                </div>
+
+
+                <!-- NEXT -->
+
+                <?php if ($page < $totalPages): ?>
+
+                    <a
+                        href="<?= htmlspecialchars(
+                            $buildPageUrl($page + 1),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
                         class="pagination-button">
 
-                        Next
+                        Next →
 
                     </a>
 
@@ -686,9 +875,10 @@
 
         <?php endif; ?>
 
+    <?php endif; ?>
 
-    </main>
 
+</main>
 
 </body>
 
