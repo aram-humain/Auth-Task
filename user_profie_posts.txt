@@ -150,6 +150,429 @@ Register
 
 
 
+Task 5: Comments, Likes, Categories and Content Moderation
+Goal
+Continue the existing system by turning the simple Posts functionality into a real
+content platform with interaction and moderation.
+The existing functionality:
+Register
+→ Email Verification
+→ Login
+→ Dashboard
+→ Logout
+→ Forgot / Reset Password
+→ Roles and Permissions
+→ Profile
+→ Posts
+must continue to work correctly.
+The main goal of this task is to understand:
+- How to model relations between several tables (one-to-many, many-to-many, self-referencing)
+- How to protect write operations (CSRF, ownership checks, rate limiting)
+- How to build listing pages that stay fast when there is a lot of data
+- How moderation works on top of the existing Role and Permission system
+- Why some data should be soft deleted instead of removed from the database
+--------------------------------------------------
+1. Post Status (Draft / Published / Archived)
+--------------------------------------------------
+A post should now have a status.
+Possible values:
+- draft
+- published
+- archived
+Rules:
+- A draft is visible only to its author (and to Admin).
+- A published post is visible in the feed and on the author profile.
+- An archived post is not shown in the feed, but the author can still see it.
+- The author should be able to move a post between statuses.
+- A new post can be saved either as a draft or published immediately.
+The status value must be validated on the backend.
+An unknown status must be rejected.
+--------------------------------------------------
+2. Categories and Tags
+--------------------------------------------------
+Add two different kinds of classification, because they use two different relations.
+Category
+- A post belongs to exactly one category.
+- Example categories: News, Tutorial, Question, Other.
+- Categories are stored in a separate table.
+- Only an Admin can create, rename or delete a category.
+Tags
+- A post can have many tags, and a tag can belong to many posts.
+- This requires a pivot table, for example: post_tag (post_id, tag_id).
+- A user enters tags as free text, for example: php, mysql, security
+- If a tag already exists, reuse it instead of creating a duplicate.
+- Tag names should be normalized (lowercase, trimmed).
+Requirements:
+- Deleting a category that still has posts must not break those posts.
+  Decide and explain your approach (block the delete, or move posts to a default category).
+- The feed should be filterable by category and by tag.
+--------------------------------------------------
+3. Post Images
+--------------------------------------------------
+A post should be able to have images.
+Requirements:
+- A post can have several images (one-to-many relation).
+- Validate the file type (only images).
+- Validate the file size (set a maximum, for example 2 MB).
+- Do not trust the original file name — generate your own name on the server.
+- Store the files outside of the database; store only the path in the database.
+- Deleting a post should also handle its images.
+- The post must display correctly when it has no images.
+Important:
+- Do not trust the extension sent by the browser.
+- Do not trust the MIME type sent by the browser.
+- Check the real file type on the server.
+--------------------------------------------------
+4. Comments
+--------------------------------------------------
+A logged-in and verified user should be able to comment on a published post.
+A comment should contain at least:
+- Post ID
+- User ID
+- Content
+- Created date
+Rules:
+- Only logged-in and verified users can create comments.
+- Comments cannot be added to a draft or archived post.
+- The author of a comment can edit and delete their own comment.
+- The author of the post can delete any comment on their own post.
+- A Moderator or Admin can delete any comment.
+- A regular user must not be able to edit or delete someone else's comment.
+Display the number of comments next to each post in the feed.
+--------------------------------------------------
+5. Nested Replies
+--------------------------------------------------
+A comment should be able to be a reply to another comment.
+This is a self-referencing relation, for example:
+comments
+- id
+- post_id
+- user_id
+- parent_id  (nullable)
+- content
+- created_at
+Requirements:
+- Show replies under their parent comment.
+- Limit the nesting to 2 levels (comment → reply). A reply to a reply attaches
+  to the same parent.
+- A reply must belong to the same post as its parent comment.
+  Sending a parent_id from a different post must be rejected.
+- Deleting a parent comment must handle its replies correctly.
+  Decide and explain your approach.
+--------------------------------------------------
+6. Likes
+--------------------------------------------------
+A user should be able to like and unlike a post.
+Requirements:
+- One user can like the same post only once.
+- Clicking again removes the like (toggle).
+- Show the total number of likes for each post.
+- Show whether the current user already liked the post.
+- A user cannot like a draft or archived post.
+Database:
+- Use a pivot table, for example: post_likes (user_id, post_id, created_at)
+- Add a UNIQUE constraint on (user_id, post_id).
+Do not rely only on PHP code to prevent duplicates.
+The database must also protect this rule.
+--------------------------------------------------
+7. Soft Delete
+--------------------------------------------------
+Posts and comments should not be physically deleted from the database.
+Add a field, for example:
+deleted_at
+Rules:
+- A deleted post must not appear in the feed, on the profile, or on its own page.
+- A deleted comment must not be shown.
+- All queries must exclude soft deleted records.
+- An Admin should be able to see deleted posts on a separate page and restore them.
+Be careful:
+Every existing query that reads posts or comments must be updated.
+A single forgotten query will show deleted content.
+--------------------------------------------------
+8. Search, Filtering and Pagination
+--------------------------------------------------
+The feed page (/posts.php) should support:
+Search
+- Search by post title and content.
+Filters
+- By category
+- By tag
+- By author
+Sorting
+- Newest first
+- Most liked
+- Most commented
+Pagination
+- Show a fixed number of posts per page, for example 10.
+- Show page numbers or Previous / Next.
+- The current search, filter and sort values must be preserved when changing page.
+Requirements:
+- All filter values come from the URL (GET parameters).
+- All values must be validated. An invalid page number, sort value or category ID
+  must not break the page and must not reach the SQL query directly.
+- Search and filters must be implemented with prepared statements.
+  String concatenation into SQL is not allowed.
+--------------------------------------------------
+9. Performance (N+1 Problem)
+--------------------------------------------------
+The feed shows a list of posts with:
+- Author name
+- Category
+- Tags
+- Like count
+- Comment count
+The naive solution runs one query per post to get this information.
+With 10 posts that becomes more than 30 queries.
+Requirements:
+- Do not run a query inside a loop.
+- Load the related data with JOIN, GROUP BY or a small number of additional queries
+  that fetch data for all posts at once (for example WHERE post_id IN (...)).
+- Count the total number of SQL queries used to render the feed page and be ready
+  to report the number.
+Target: a feed page with 10 posts should not need more than about 5 queries.
+--------------------------------------------------
+10. CSRF Protection
+--------------------------------------------------
+All forms that change data must be protected against CSRF.
+This includes:
+- Create / edit / delete post
+- Create / edit / delete comment
+- Like / unlike
+- Profile update
+- Role change (from Task 3)
+Requirements:
+- Generate a CSRF token and store it in the session.
+- Add the token as a hidden field in every POST form.
+- Verify the token on the server before processing the request.
+- If the token is missing or wrong, reject the request.
+- Compare tokens safely (hash_equals), not with a simple ==.
+Be ready to demonstrate:
+Submitting a form without a valid token must fail.
+--------------------------------------------------
+11. Rate Limiting
+--------------------------------------------------
+Prevent spam and abuse on write actions.
+Examples:
+- Maximum 5 comments per minute per user
+- Maximum 10 posts per day per user
+- Maximum 5 failed login attempts in 15 minutes per email or IP
+Requirements:
+- Store the attempts in the database or in the session.
+- When the limit is reached, show a clear message and reject the action.
+- Explain where you store the counters and why.
+Note: failed login attempts must be limited per email or IP,
+not only in the current session, otherwise the limit is easy to bypass.
+--------------------------------------------------
+12. Moderation
+--------------------------------------------------
+Connect the content to the existing Role and Permission system.
+Add new permissions, for example:
+- create_post
+- moderate_posts
+- moderate_comments
+- view_deleted_posts
+Assign them:
+User
+- create_post
+Moderator
+- create_post
+- moderate_posts
+- moderate_comments
+Admin
+- everything above
+- view_deleted_posts
+Moderator page (/moderator.php) should allow:
+- Viewing reported posts and comments
+- Hiding (soft deleting) a post or comment
+- Seeing who reported it and why
+Report functionality:
+- A logged-in user can report a post or a comment.
+- A report contains: reporter, target, reason, created date.
+- The same user cannot report the same item twice.
+- The author cannot report their own content.
+All moderation actions must be checked with the permission system,
+using can('moderate_posts') style checks — not with if ($role === 'admin').
+--------------------------------------------------
+13. Activity Log
+--------------------------------------------------
+Record important actions in a separate table.
+For example:
+activity_log
+- id
+- user_id
+- action
+- target_type
+- target_id
+- ip_address
+- created_at
+Log at least:
+- Post created / updated / deleted
+- Comment deleted by a moderator
+- Role changed
+- Failed login attempt
+- Password reset
+An Admin should be able to view the log with pagination and a filter by user.
+--------------------------------------------------
+14. Transactions
+--------------------------------------------------
+Some operations touch more than one table.
+For example, creating a post with tags and images:
+1. Insert the post
+2. Insert or find the tags
+3. Insert the rows in post_tag
+4. Insert the image rows
+If one of these steps fails, the database must not be left in a broken state
+(for example a post with no tags, or tags pointing to a post that was not created).
+Requirements:
+- Use a transaction (beginTransaction, commit, rollBack).
+- On error, roll back and show the user a clear message.
+- Be ready to demonstrate a rollback by forcing an error in the middle.
+--------------------------------------------------
+15. Authorization Scenarios
+--------------------------------------------------
+Scenario 1
+User A opens the edit page of User B's post.
+→ Access denied
+Scenario 2
+User A sends a POST request to delete User B's post,
+with User B's post ID in the request body.
+→ Request rejected
+Scenario 3
+User A sends a comment with parent_id of a comment that belongs to another post.
+→ Request rejected
+Scenario 4
+A non-verified user tries to create a post or a comment.
+→ Request rejected
+Scenario 5
+A guest (not logged in) opens the feed.
+→ Posts are visible, but Like, Comment and Report are not available.
+→ Sending those requests directly must also be rejected.
+Scenario 6
+A Moderator deletes a comment on someone else's post.
+→ Allowed, and the action appears in the activity log.
+Scenario 7
+A regular user opens the deleted posts page.
+→ Access denied
+Scenario 8
+A user opens:
+/posts.php?page=-5&sort=; DROP TABLE users; --
+→ The page must work normally and must not execute anything dangerous.
+--------------------------------------------------
+16. Code Structure
+--------------------------------------------------
+The project is now bigger, so structure matters.
+Suggested separation:
+Auth
+→ login, session, verification
+User
+→ user database logic
+Profile
+→ profile database logic
+Role / Permission
+→ access checking
+Post
+→ post database logic
+Comment
+→ comment database logic
+Tag / Category
+→ classification logic
+Like
+→ like logic
+Report / Moderation
+→ moderation logic
+Upload
+→ file validation and saving
+Csrf
+→ token generation and verification
+RateLimiter
+→ attempt counting
+ActivityLogger
+→ logging
+Rules:
+- SQL, HTML and business logic must not be mixed in the same file.
+- Validation logic should be reusable, not copy-pasted on every page.
+- Repeated HTML (header, footer, post card, comment block) should be in shared files.
+- No SQL query inside a loop.
+--------------------------------------------------
+17. Database Requirements
+--------------------------------------------------
+- Use foreign keys with the correct ON DELETE behaviour.
+- Add a UNIQUE constraint where a rule requires uniqueness
+  (likes, tag names, reports).
+- Add indexes on the columns used for filtering and sorting
+  (post_id, user_id, created_at, status, deleted_at).
+- Provide the full SQL schema file in the project.
+Be ready to explain each foreign key and each index you added.
+--------------------------------------------------
+Expected Flow
+--------------------------------------------------
+Author flow:
+Login
+→ Create Post (draft)
+→ Add category and tags
+→ Upload images
+→ Publish
+→ See it in the feed
+Reader flow:
+Open Feed
+→ Filter by tag
+→ Open Post
+→ Like
+→ Comment
+→ Reply to a comment
+Moderation flow:
+User reports a post
+→ Moderator opens the moderation page
+→ Moderator hides the post
+→ Post disappears from the feed
+→ Action appears in the activity log
+→ Admin restores the post
+--------------------------------------------------
+Expected Result
+--------------------------------------------------
+At the end of the task, the system should include:
+- Post statuses (draft / published / archived)
+- Categories (one-to-many) and tags (many-to-many)
+- Post images with server-side file validation
+- Comments with nested replies
+- Likes with a unique database constraint
+- Soft delete for posts and comments, with Admin restore
+- Search, filtering, sorting and pagination
+- A feed page that does not use a query inside a loop
+- CSRF protection on every write action
+- Rate limiting
+- Reporting and moderation built on the permission system
+- Activity log
+- Transactions for multi-table operations
+All previous functionality (Authentication, Email Verification, Password Reset,
+Roles and Permissions, Profile, Posts) must continue to work correctly.
+--------------------------------------------------
+Be Ready to Explain
+--------------------------------------------------
+1. What is the difference between a one-to-many and a many-to-many relation,
+   and why is a category one-to-many while tags are many-to-many?
+2. What is the N+1 query problem? How many queries does your feed page run,
+   and how did you reduce that number?
+3. What is CSRF? Show how an attacker would use it, and how your token stops it.
+4. Why is it not safe to trust the file extension or the MIME type sent by the browser
+   when uploading an image?
+5. Why did you choose soft delete instead of deleting the rows?
+   What are the disadvantages of soft delete?
+6. Why is a UNIQUE constraint on likes necessary if the PHP code already checks
+   whether a like exists?
+7. What is a database transaction, and what would break in your create-post flow
+   without one?
+8. How do you make sure a comment reply belongs to the same post as its parent?
+9. Where do you store rate limit counters, and why would storing them only in the
+   session be a bad idea?
+10. A user sends a delete request with someone else's post ID.
+    Which exact line of your code stops it?
+11. What indexes did you add and why? Which query does each index help?
+12. If we add a new content type tomorrow, for example Videos, how much of your
+    comment, like and report code could be reused?
+
+
+
 
 * ------------------------------ TASK 4 PODGOTOVKA ------------------------------ *
 
@@ -518,3 +941,60 @@ Features:
 - Report a post.
 - Review, dismiss, or take action on a report.
 - Share a public post URL without creating a share table.
+
+
+
+
+
+
+
+
+
+******************************************************************
+
+| Функциональность                               | Сейчас                          |
+| ---------------------------------------------- | ------------------------------- |
+| Profile create/view/edit                       | ✅                               |
+| Profile picture add/replace/remove             | ✅                               |
+| View another profile                           | ✅                               |
+| Create Post                                    | ✅                               |
+| UUIDv7                                         | ✅                               |
+| Draft / Published при создании                 | ✅                               |
+| Categories DB + выбор категории                | ✅                               |
+| Tags + normalization + pivot                   | ✅                               |
+| Несколько изображений                          | ✅                               |
+| Реальная MIME-проверка через `finfo`           | ✅                               |
+| Transaction Create Post + tags + images        | ✅                               |
+| 10 posts / 24h rate limit                      | ✅                               |
+| Activity log для `post_created`                | ✅                               |
+| Feed                                           | ✅                               |
+| Search title/content                           | ✅                               |
+| Category filter                                | ✅                               |
+| Tag filter                                     | ✅                               |
+| Author filter по `public_slug`                 | ✅                               |
+| Newest / liked / commented sorting             | ✅                               |
+| Pagination + сохранение GET filters            | ✅                               |
+| Like/comment counts в feed                     | ✅ только отображение            |
+| Posts пользователя внутри Profile              | ❌                               |
+| Author name → Profile                          | ❌ имя сейчас обычный `<div>`    |
+| Edit own Post                                  | ❌                               |
+| Change draft/published/archived после создания | ❌                               |
+| Delete own Post                                | ❌                               |
+| Guest feed                                     | ❌                               |
+| Admin Category CRUD                            | ❌                               |
+| Like / Unlike                                  | ❌                               |
+| Comments                                       | ❌                               |
+| Edit/Delete comment                            | ❌                               |
+| Nested replies                                 | ❌                               |
+| Soft-delete actions                            | ❌                               |
+| Admin restore deleted posts                    | ❌                               |
+| Reports                                        | ❌                               |
+| Moderation page for reports                    | ❌                               |
+| Comment 5/min limit                            | ❌                               |
+| Failed login 5/15 min limit                    | ❌                               |
+| Full Activity Log requirements                 | ❌                               |
+| Admin Activity Log pagination/filter           | ❌                               |
+| `schema.sql` in repository                     | ❌                               |
+| Skills                                         | ❌ — files exist but are 0 bytes |
+| Experience                                     | ❌ — files exist but are 0 bytes |
+| Notifications                                  | ❌                               |

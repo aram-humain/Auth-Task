@@ -2,6 +2,9 @@
 
 /** @var array $profile */
 /** @var array $isOwner */
+/** @var array $profilePosts */
+/** @var array $isAdmin */
+
 
 $firstName = $profile['first_name'] ?? '';
 $lastName = $profile['last_name'] ?? '';
@@ -218,6 +221,132 @@ if ($fullName === '') {
 
             </div>
 
+            <div class="profile-section">
+
+                <h2>Posts</h2>
+
+                <?php if (empty($profilePosts)): ?>
+
+                    <div class="profile-empty">
+
+                        No published posts yet.
+
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="profile-posts">
+
+                        <?php foreach ($profilePosts as $post): ?>
+
+                            <article class="profile-post">
+
+                                <div class="profile-post-meta">
+
+                                    <span>
+
+                                        <?= htmlspecialchars(
+                                            $post['category_name'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+
+                                    </span>
+
+                                    <span>·</span>
+
+                                    <?php if ($isOwner || $isAdmin): ?>
+
+                                        <span>
+                                            <?= htmlspecialchars(
+                                                ucfirst($post['status']),
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                    <time>
+
+                                        <?= htmlspecialchars(
+                                            date(
+                                                'd M Y, H:i',
+                                                strtotime(
+                                                    $post['created_at']
+                                                )
+                                            ),
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+
+                                    </time>
+
+                                </div>
+
+
+                                <h3>
+
+                                    <a
+                                        href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                                                $post['uuid']
+                                                                            ) ?>">
+
+                                        <?= htmlspecialchars(
+                                            $post['title'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+
+                                    </a>
+
+                                </h3>
+
+
+                                <?php if (
+                                    trim($post['content'] ?? '') !== ''
+                                ): ?>
+
+                                    <?php
+
+                                    $preview = $post['content'];
+
+                                    if (mb_strlen($preview) > 250) {
+                                        $preview =
+                                            mb_substr(
+                                                $preview,
+                                                0,
+                                                250
+                                            )
+                                            . '...';
+                                    }
+
+                                    ?>
+
+                                    <p>
+
+                                        <?= nl2br(
+                                            htmlspecialchars(
+                                                $preview,
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            )
+                                        ) ?>
+
+                                    </p>
+
+                                <?php endif; ?>
+
+                            </article>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
             <div class="profile-actions">
 
                 <a
@@ -226,7 +355,7 @@ if ($fullName === '') {
                     Back to Dashboard
                 </a>
 
-                 <?php if ($isOwner): ?>
+                <?php if ($isOwner): ?>
 
                     <a
                         href="/Components/Profile/EditProfile.php"

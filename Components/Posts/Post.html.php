@@ -4,9 +4,10 @@
 /** @var array<int, array<string, mixed>> $images */
 /** @var array<int, array<string, mixed>> $tags */
 /** @var string $authorName */
-/** @var string $postUuid */
+/** @var string $uuid */
 /** @var bool $isOwner */
 /** @var bool $isAdmin */
+/** @var string $csrfToken */
 
 ?>
 
@@ -47,252 +48,441 @@
 <body>
 
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle">
+    <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle">
 
-    Theme
+        Theme
 
-</button>
-
-
-<main class="post-page">
-
-    <article class="post-card">
+    </button>
 
 
-        <!-- DELETED WARNING -->
+    <main class="post-page">
 
-        <?php if ($post['deleted_at'] !== null): ?>
-
-            <div class="post-warning">
-
-                This post has been deleted.
-
-            </div>
-
-        <?php endif; ?>
+        <article class="post-card">
 
 
+            <?php if ($post['deleted_at'] !== null): ?>
 
-        <!-- HEADER -->
+                <div class="post-warning">
 
-        <header class="post-header">
+                    This post has been deleted.
 
-            <div class="post-author">
+                </div>
 
-                <a
-                    href="/Components/Profile/Profile.php?slug=<?= urlencode(
-                        $post['public_slug']
-                    ) ?>"
-                    class="post-author-name">
-
-                    <?= htmlspecialchars(
-                        $authorName,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>
-
-                </a>
+            <?php endif; ?>
 
 
-                <div class="post-meta">
+            <header class="post-header">
 
-                    <span>
+                <div class="post-author">
+
+                    <a
+                        href="/Components/Profile/Profile.php?slug=<?= urlencode(
+                                                                        $post['public_slug']
+                                                                    ) ?>"
+                        class="post-author-name">
 
                         <?= htmlspecialchars(
-                            $post['category_name'],
+                            $authorName,
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>
 
-                    </span>
+                    </a>
 
 
-                    <span>·</span>
+                    <div class="post-meta">
+
+                        <span>
+
+                            <?= htmlspecialchars(
+                                $post['category_name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
+                        </span>
 
 
-                    <time
-                        datetime="<?= htmlspecialchars(
-                            $post['created_at'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>">
+                        <span>·</span>
+
+
+                        <time
+                            datetime="<?= htmlspecialchars(
+                                            $post['created_at'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
+
+                            <?= htmlspecialchars(
+                                date(
+                                    'd M Y, H:i',
+                                    strtotime(
+                                        $post['created_at']
+                                    )
+                                ),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
+                        </time>
+
+                    </div>
+
+                </div>
+
+
+                <?php if ($isOwner || $isAdmin): ?>
+
+                    <div class="post-status">
 
                         <?= htmlspecialchars(
-                            date(
-                                'd M Y, H:i',
-                                strtotime(
-                                    $post['created_at']
-                                )
+                            ucfirst(
+                                $post['status']
                             ),
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>
 
-                    </time>
+                    </div>
 
-                </div>
+                <?php endif; ?>
 
-            </div>
+            </header>
 
 
-            <?php if (
-                $isOwner
-                || $isAdmin
-            ): ?>
+            <section class="post-content">
 
-                <div class="post-status">
+                <h1>
 
                     <?= htmlspecialchars(
-                        ucfirst(
-                            $post['status']
-                        ),
+                        $post['title'],
                         ENT_QUOTES,
                         'UTF-8'
                     ) ?>
 
-                </div>
-
-            <?php endif; ?>
-
-        </header>
+                </h1>
 
 
+                <?php if (
+                    trim(
+                        $post['content'] ?? ''
+                    ) !== ''
+                ): ?>
 
-        <!-- CONTENT -->
+                    <div class="post-text">
 
-        <section class="post-content">
-
-            <h1>
-
-                <?= htmlspecialchars(
-                    $post['title'],
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
-
-            </h1>
-
-
-            <?php if (
-                trim(
-                    $post['content'] ?? ''
-                ) !== ''
-            ): ?>
-
-                <div class="post-text">
-
-                    <?= nl2br(
-                        htmlspecialchars(
-                            $post['content'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        )
-                    ) ?>
-
-                </div>
-
-            <?php endif; ?>
-
-        </section>
-
-
-
-        <!-- IMAGES -->
-
-        <?php if (!empty($images)): ?>
-
-            <section class="post-images">
-
-                <?php foreach ($images as $image): ?>
-
-                    <div class="post-image">
-
-                        <img
-                            src="<?= htmlspecialchars(
-                                $image['image_url'],
+                        <?= nl2br(
+                            htmlspecialchars(
+                                $post['content'],
                                 ENT_QUOTES,
                                 'UTF-8'
-                            ) ?>"
-                            alt="Post image"
-                            loading="lazy">
+                            )
+                        ) ?>
 
                     </div>
 
-                <?php endforeach; ?>
+                <?php endif; ?>
 
             </section>
 
-        <?php endif; ?>
+
+            <?php if (!empty($images)): ?>
+
+                <section class="post-images">
+
+                    <?php foreach ($images as $image): ?>
+
+                        <div class="post-image">
+
+                            <img
+                                src="<?= htmlspecialchars(
+                                            $image['image_url'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
+                                alt="Post image"
+                                loading="lazy">
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </section>
+
+            <?php endif; ?>
 
 
+            <?php if (!empty($tags)): ?>
 
-        <!-- TAGS -->
+                <section class="post-tags">
 
-        <?php if (!empty($tags)): ?>
+                    <?php foreach ($tags as $tag): ?>
 
-            <section class="post-tags">
+                        <span class="post-tag">
 
-                <?php foreach ($tags as $tag): ?>
+                            #<?= htmlspecialchars(
+                                    $tag['name'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
 
-                    <span class="post-tag">
+                        </span>
 
-                        #<?= htmlspecialchars(
-                            $tag['name'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
+                    <?php endforeach; ?>
 
-                    </span>
+                </section>
 
-                <?php endforeach; ?>
-
-            </section>
-
-        <?php endif; ?>
+            <?php endif; ?>
 
 
+            <section
+                class="comments-section"
+                id="comments">
 
-        <!-- FOOTER -->
+                <div class="comments-header">
 
-        <footer class="post-footer">
+                    <h2>
+                        Comments
+                    </h2>
 
+                    <span class="comments-count">
 
-            <a
-                href="/Components/Posts/Posts.php"
-                class="post-back-button">
-
-                Back to Posts
-
-            </a>
-
-
-            <?php if (
-                $isOwner
-                && $post['deleted_at'] === null
-            ): ?>
-
-                <div class="post-owner-actions">
-
-                    <span class="post-owner-label">
-
-                        Your post
+                        <?= count($comments) ?>
 
                     </span>
 
                 </div>
 
-            <?php endif; ?>
+
+                <?php if ($canComment): ?>
+
+                    <form
+                        method="POST"
+                        action="/Components/Comments/AddComment.php"
+                        class="comment-form">
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(
+                                        $csrfToken,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>">
+
+                        <input
+                            type="hidden"
+                            name="post_id"
+                            value="<?= htmlspecialchars(
+                                        $uuid,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>">
+
+                        <textarea
+                            name="content"
+                            rows="4"
+                            maxlength="2000"
+                            required
+                            placeholder="Write a comment..."></textarea>
+
+                        <div class="comment-form-actions">
+
+                            <button
+                                type="submit"
+                                class="comment-submit-button">
+
+                                Add Comment
+
+                            </button>
+
+                        </div>
+
+                    </form>
 
 
-        </footer>
+                <?php elseif ($viewerUserId === null): ?>
+
+                    <div class="comment-login-message">
+
+                        <a href="/Components/Login/Login.php">
+                            Log in
+                        </a>
+
+                        to leave a comment.
+
+                    </div>
+
+                <?php endif; ?>
 
 
-    </article>
+                <?php if (empty($comments)): ?>
 
-</main>
+                    <div class="comments-empty">
+
+                        No comments yet.
+
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="comments-list">
+
+                        <?php foreach ($comments as $comment): ?>
+
+                            <?php
+
+                            $commentAuthor = trim(
+                                ($comment['first_name'] ?? '')
+                                    . ' '
+                                    . ($comment['last_name'] ?? '')
+                            );
+
+                            if ($commentAuthor === '') {
+                                $commentAuthor = 'User';
+                            }
+
+                            ?>
+
+                            <article class="comment-card">
+
+                                <div class="comment-card-header">
+
+                                    <a
+                                        href="/Components/Profile/Profile.php?slug=<?= urlencode(
+                                                                                        $comment['public_slug']
+                                                                                    ) ?>"
+                                        class="comment-author">
+
+                                        <?= htmlspecialchars(
+                                            $commentAuthor,
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+
+                                    </a>
+
+
+                                    <time class="comment-date">
+
+                                        <?= htmlspecialchars(
+                                            date(
+                                                'd M Y, H:i',
+                                                strtotime(
+                                                    $comment['created_at']
+                                                )
+                                            ),
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+
+                                    </time>
+
+                                </div>
+
+
+                                <div class="comment-content">
+
+                                    <?= nl2br(
+                                        htmlspecialchars(
+                                            $comment['content'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        )
+                                    ) ?>
+
+                                </div>
+
+                            </article>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+                <?php endif; ?>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <a
+                    href="/Components/Posts/Posts.php"
+                    class="post-back-button">
+
+                    Back to Posts
+
+                </a>
+
+
+                <?php if (
+                    $isOwner
+                    && $post['deleted_at'] === null
+                ): ?>
+
+                    <div class="post-owner-actions">
+
+                        <div class="post-owner-actions">
+
+                            <span class="post-owner-label">
+                                Your post
+                            </span>
+
+                            <a
+                                href="/Components/Posts/EditPost.php?id=<?= urlencode($uuid) ?>"
+                                class="post-edit-button">
+
+                                Edit Post
+
+                            </a>
+
+                            <form
+                                method="POST"
+                                action="/Components/Posts/DeletePost.php"
+                                class="post-delete-form"
+                                onsubmit="return confirm('Are you sure you want to delete this post?');">
+
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= htmlspecialchars(
+                                                $csrfToken,
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>">
+
+                                <input
+                                    type="hidden"
+                                    name="id"
+                                    value="<?= htmlspecialchars(
+                                                $uuid,
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>">
+
+                                <button
+                                    type="submit"
+                                    class="post-delete-button">
+
+                                    Delete Post
+
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                <?php endif; ?>
+
+            </footer>
+
+
+        </article>
+
+    </main>
 
 
 </body>

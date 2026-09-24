@@ -2,10 +2,13 @@
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/csrf.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
 
+use Egulias\EmailValidator\Result\Reason\CommentsInIDRight;
 use Ramsey\Uuid\Uuid;
 
 $uuid = trim($_GET['id'] ?? '');
@@ -33,9 +36,8 @@ $isOwner = $viewerUserId !== null && (int) $post['user_id'] === $viewerUserId;
 $isAdmin = $viewerUserId !== null && hasRole($pdo, 'Admin');
 
 
-// view soft deleted post permission check
 if ($post['deleted_at'] !== null) {
-    if($viewerUserId === null || !can($pdo, 'view_deleted_post')) {
+    if($viewerUserId === null || !can($pdo, 'view_deleted_posts')) {
         http_response_code(404);
 
         exit('Post not found.');
@@ -69,5 +71,11 @@ $authorName = trim(
 if ($authorName === '') {
     $authorName = 'User';
 }
+
+$comments = getPostComments($pdo, (int) $post['id']);
+
+$csrfToken = csrfToken();
+
+$canComment = $viewerUserId !== null && $post['deleted_at'] === null && $post['status'] === 'published';
 
 require_once __DIR__ . '/Post.html.php';

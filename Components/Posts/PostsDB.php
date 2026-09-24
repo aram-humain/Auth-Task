@@ -5,8 +5,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/upload.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/cloudinary.php';
 
-requireLogin();
-$userId = currentUserId();
+// requireLogin();
+// $userId = currentUserId();
 
 function createPost(PDO $pdo, string $publicId, int $userId, string  $title, int $categoryId, string $content, string $status): int
 {
@@ -688,4 +688,211 @@ function getFeedAuthors(PDO $pdo): array
     );
 
     return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+function getProfilePostsByUserId(
+    PDO $pdo,
+    int $userId,
+    bool $includePrivate = false
+): array {
+    $sql = "
+        SELECT
+            p.id,
+            p.public_id,
+            p.title,
+            p.content,
+            p.status,
+            p.created_at,
+            c.name AS category_name
+
+        FROM posts p
+
+        JOIN categories c
+            ON c.id = p.category_id
+
+        WHERE p.user_id = :user_id
+          AND p.deleted_at IS NULL
+    ";
+
+    if (!$includePrivate) {
+        $sql .= "
+            AND p.status = 'published'
+        ";
+    }
+
+    $sql .= "
+        ORDER BY p.created_at DESC
+    ";
+
+    $statement = $pdo->prepare($sql);
+
+    $statement->execute([
+        'user_id' => $userId
+    ]);
+
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getOwnedPostByPublicId(
+    PDO $pdo,
+    string $publicId,
+    int $userId
+): ?array {
+    $statement = $pdo->prepare(
+        "SELECT 
+        p.id,
+        p.public_id,
+        p.user_id,
+        p.title,
+        p.content,
+        p.status,
+        p.category_id,
+        p.created_at,
+        p.updated_at
+        
+        FROM posts p
+        
+        WHERE p.public_id = :public_id
+        AND p.user_id = :user_id
+        AND p.deleted_at IS NULL
+        
+        LIMIT 1"
+    );
+
+    $statement->execute([
+        'public_id' => $publicId,
+        'user_id' => $userId
+    ]);
+
+    $post = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return $post ?: null;
+}
+
+function updateOwnedPost (
+    PDO $pdo,
+    int $postId,
+    int $userId,
+    string $title,
+    int $categoryId,
+    string $content,
+    string $status
+): bool {
+    $statement = $pdo->prepare(
+        "UPDATE posts
+        SET title = :title,
+        category_id = :category_id,
+        content = :content,
+        status = :status,
+        updated_at = CURRENT_TIMESTAMP
+        
+        WHERE id = :post_id
+        AND user_id = :user_id
+        AND deleted_at IS NULL"
+    );
+
+    $statement->execute([
+        'title' => $title,
+        'user_id' => $userId,
+        'post_id' => $postId,
+        'category_id' => $categoryId,
+        'content' => $content,
+        'status' => $status
+    ]);
+
+    return $statement->rowCount() > 0;
+}
+
+function replacePostTags(
+    PDO $pdo,
+    int $postId,
+    string $tagsInput
+): void {
+    $statement = $pdo->prepare(
+        "DELETE FROM post_tag 
+        WHERE post_id = :post_id"
+    );
+
+    $statement->execute(['post_id' => $postId]);
+
+    if(trim($tagsInput) !== '') {
+        processPostTags($pdo, $postId, $tagsInput);
+    }
+}
+
+function softDeleteOwnedPost(
+    PDO $pdo,
+    int $postId,
+    int $userId
+): bool {
+    $statement = $pdo->prepare(
+        "UPDATE posts
+        SET deleted_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = :post_id
+        AND user_id = :user_id
+        AND deleted_at IS NULL"
+    );
+
+    $statement->execute([
+        'post_id' => $postId,
+        'user_id' => $userId
+    ]);
+
+    return $statement->rowCount() > 0;
+}
+
+function getDeletedPosts(PDO $pdo): array {
+    $statement = $pdo->prepare(
+        "SELECT
+            p.id,
+            p.public_id,
+            p.title,
+            p.status,
+            p.created_at,
+            p.deleted_at,
+            
+            c.name AS category_name,
+            
+            pr.first_name,
+            pr.last_name,
+            pr.public_slug
+            
+        FROM posts p
+        
+        JOIN categories c 
+            ON c.id = p.category_id
+        JOIN profiles pr
+            ON pr.user_id = p.user_id
+            
+        WHERE p.deleted_at IS NOT NULL
+        
+        ORDER BY p.deleted_at DESC"
+    );
+
+    $statement->execute();
+
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function restoreDeletedPost(
+    PDO $pdo,
+    int $postId
+): bool {
+    $statement = $pdo->prepare(
+        "UPDATE posts
+        SET 
+        deleted_at = NULL,
+        updated_at = CURRENT_TIMESTAMP
+        
+        WHERE id = :post_id
+            AND deleted_at IS NOT NULL"
+    );
+
+    $statement->execute([
+        'post_id' => $postId
+    ]);
+
+    return $statement->rowCount() > 0;
 }

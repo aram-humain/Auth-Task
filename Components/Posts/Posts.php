@@ -7,6 +7,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 
 use Ramsey\Uuid\Uuid;
 
+$currentUserId = currentUserId();
+
 $perPage = 6;
 
 $page = filter_input(
@@ -182,6 +184,5 @@ foreach ($posts as &$post) {
 
 unset($post);
 
-$currentUserId = currentUserId();
 
 require_once __DIR__ . '/Posts.html.php';
