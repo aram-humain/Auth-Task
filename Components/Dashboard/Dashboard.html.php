@@ -180,7 +180,7 @@
             <div class="logout-container">
 
                 <a
-                    href="../logout.php"
+                    href="/logout.php"
                     class="logout-button">
                     Logout
                 </a>

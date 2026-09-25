@@ -103,3 +103,35 @@ function updateProfile (
         'user_id' => $userId
     ]);
 }
+
+function updateProfilePicture(PDO $pdo, int $userId, string $url, string $publicId): void {
+    $statement = $pdo->prepare(
+        'UPDATE profiles
+        SET
+            profile_picture = :profile_picture,
+            profile_picture_public_id = :public_id,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = :user_id'
+    );
+
+    $statement->execute([
+        'profile_picture' => $url,
+        'public_id' => $publicId,
+        'user_id' => $userId
+    ]);
+}
+
+function removeProfilePicture(PDO $pdo, int $userId): void {
+    $statement = $pdo->prepare(
+        'UPDATE profiles
+        SET
+            profile_picture = NULL,
+            profile_picture_public_id = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = :user_id'
+    );
+
+    $statement->execute([
+        'user_id' => $userId
+    ]);
+}

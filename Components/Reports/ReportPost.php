@@ -86,7 +86,7 @@ if (hasUserReportedPost($pdo, $postId, $userId)) {
 }
 
 try {
-    createPostReport($pdo, $postId, $userId, $reason);
+    createPostReport($pdo, $postId, $userId, $reason, $description);
 
     setFlash('success', 'Post reported successfully.');
 

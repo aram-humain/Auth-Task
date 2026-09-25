@@ -1,7 +1,5 @@
 <?php
 
-use Symfony\Component\Mime\Test\Constraint\EmailHeaderSame;
-
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
@@ -61,7 +59,7 @@ try {
    
    setFlash('success', 'Post hidden successfully.');
 
-   header('Location: /Components/Moderator/Moderatpor.php');
+   header('Location: /Components/Moderator/Moderator.php');
    exit;
 } catch(Throwable $exception) {
     if($pdo->inTransaction()) {

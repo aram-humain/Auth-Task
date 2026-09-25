@@ -9,7 +9,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/activity_log.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 
 
-requireRole($pdo, 'Admin');
+requirePermission($pdo, 'view_deleted_posts');
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

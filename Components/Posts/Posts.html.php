@@ -418,8 +418,8 @@
 
                                     <a
                                         href="/Components/Profile/Profile.php?slug=<?= urlencode(
-                                            $post['public_slug']
-                                        ) ?>"
+                                                                                        $post['public_slug']
+                                                                                    ) ?>"
                                         class="post-author-name">
 
                                         <?= htmlspecialchars(
@@ -536,37 +536,72 @@
                         <?php endif; ?>
 
 
-                        <!-- IMAGE -->
+                        <!-- IMAGES -->
 
                         <?php
 
                         $postImages =
-                            $imagesByPost[(int) $post['id']] ?? [];
+                            $imagesByPost[(int) $post['id']]
+                            ?? [];
+
+                        $previewImages =
+                            array_slice(
+                                $postImages,
+                                0,
+                                2
+                            );
+
+                        $totalImages =
+                            count($postImages);
 
                         ?>
 
+                        <?php if (!empty($previewImages)): ?>
 
-                        <?php if (!empty($postImages)): ?>
+                            <div
+                                class="post-images-preview <?= $totalImages === 1
+                                                                ? 'post-images-preview-single'
+                                                                : 'post-images-preview-multiple' ?>">
 
-                            <?php $firstImage = $postImages[0]; ?>
+                                <?php foreach (
+                                    $previewImages as $index => $image
+                                ): ?>
 
-                            <a
-                                href="/Components/Posts/Post.php?id=<?= urlencode(
-                                                                        $postUuid
-                                                                    ) ?>"
-                                class="post-image-wrapper">
+                                    <a
+                                        href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                                                $postUuid
+                                                                            ) ?>"
+                                        class="post-preview-image-wrapper">
 
-                                <img
-                                    src="<?= htmlspecialchars(
-                                                $firstImage['image_url'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>"
-                                    alt="Post image"
-                                    loading="lazy"
-                                    class="post-image">
+                                        <img
+                                            src="<?= htmlspecialchars(
+                                                        $image['image_url'],
+                                                        ENT_QUOTES,
+                                                        'UTF-8'
+                                                    ) ?>"
+                                            alt="Post image"
+                                            loading="lazy"
+                                            class="post-preview-image">
 
-                            </a>
+
+                                        <?php if (
+                                            $index === 1
+                                            && $totalImages > 2
+                                        ): ?>
+
+                                            <span class="post-more-images">
+
+                                                +<?= $totalImages - 2 ?>
+
+                                            </span>
+
+                                        <?php endif; ?>
+
+                                    </a>
+
+                                <?php endforeach; ?>
+
+                            </div>
 
                         <?php endif; ?>
 
