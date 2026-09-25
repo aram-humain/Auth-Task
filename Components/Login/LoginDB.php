@@ -23,3 +23,16 @@ function findUserByCredentials(PDO $pdo, string $email, string $password): ?arra
 
     return null;
 }
+
+
+function findUserIdByEmail(PDO $pdo, string $email): ?int {
+    $statement = $pdo->prepare(
+        "SELECT id FROM users WHERE email = :email LIMIT 1"
+    );
+
+    $statement->execute(['email' => $email]);
+
+    $userId = $statement->fetchColumn();
+
+    return $userId === false ? null : (int) $userId;
+}

@@ -894,3 +894,20 @@ function restoreDeletedPost(
 
     return $statement->rowCount() > 0;
 }
+
+function softDeletePostById(PDO $pdo, int $postId): bool {
+    $statement = $pdo->prepare(
+        "UPDATE posts
+        
+        SET 
+        deleted_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+        
+        WHERE id = :id
+        AND deleted_at IS NULL"
+    );
+
+    $statement->execute(['id' => $postId]);
+
+    return $statement->rowCount() > 0;
+}

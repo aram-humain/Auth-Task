@@ -128,4 +128,11 @@ $canLike =
     && $post['deleted_at'] === null
     && $post['status'] === 'published';
 
+
+$canReportPost =
+    $viewerUserId !== null
+    && (int) $post['user_id'] !== $viewerUserId
+    && $post['status'] === 'published'
+    && $post['deleted_at'] === null;
+
 require_once __DIR__ . '/Post.html.php';
