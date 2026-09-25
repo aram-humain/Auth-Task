@@ -952,49 +952,81 @@ Features:
 
 ******************************************************************
 
-| Функциональность                               | Сейчас                          |
-| ---------------------------------------------- | ------------------------------- |
-| Profile create/view/edit                       | ✅                               |
-| Profile picture add/replace/remove             | ✅                               |
-| View another profile                           | ✅                               |
-| Create Post                                    | ✅                               |
-| UUIDv7                                         | ✅                               |
-| Draft / Published при создании                 | ✅                               |
-| Categories DB + выбор категории                | ✅                               |
-| Tags + normalization + pivot                   | ✅                               |
-| Несколько изображений                          | ✅                               |
-| Реальная MIME-проверка через `finfo`           | ✅                               |
-| Transaction Create Post + tags + images        | ✅                               |
-| 10 posts / 24h rate limit                      | ✅                               |
-| Activity log для `post_created`                | ✅                               |
-| Feed                                           | ✅                               |
-| Search title/content                           | ✅                               |
-| Category filter                                | ✅                               |
-| Tag filter                                     | ✅                               |
-| Author filter по `public_slug`                 | ✅                               |
-| Newest / liked / commented sorting             | ✅                               |
-| Pagination + сохранение GET filters            | ✅                               |
-| Like/comment counts в feed                     | ✅ только отображение            |
-| Posts пользователя внутри Profile              | ✅                               |
-| Author name → Profile                          | ✅     |
-| Edit own Post                                  | ✅                               |
-| Change draft/published/archived после создания | ✅                               |
-| Delete own Post                                | ✅                               |
-| Guest feed                                     | ❌                               |
-| Admin Category CRUD                            | ❌                               |
-| Like / Unlike                                  | ❌                               |
-| Comments                                       | ❌                               |
-| Edit/Delete comment                            | ❌                               |
-| Nested replies                                 | ❌                               |
-| Soft-delete actions                            | ❌                               |
-| Admin restore deleted posts                    | ✅                               |
-| Reports                                        | ❌                               |
-| Moderation page for reports                    | ❌                               |
-| Comment 5/min limit                            | ❌                               |
-| Failed login 5/15 min limit                    | ❌                               |
-| Full Activity Log requirements                 | ❌                               |
-| Admin Activity Log pagination/filter           | ❌                               |
-| `schema.sql` in repository                     | ❌                               |
-| Skills                                         | ❌ — files exist but are 0 bytes |
-| Experience                                     | ❌ — files exist but are 0 bytes |
-| Notifications                                  | ❌                               |
+| Функциональность | Сейчас |
+|---|---|
+| Profile create/view/edit | ✅ |
+| Profile picture add/replace/remove | ✅ |
+| View another profile | ✅ |
+| Guest может открыть public Profile | ✅ |
+| Profile URL через `public_slug` | ✅ |
+| Create Post | ✅ |
+| UUIDv7 для Posts | ✅ |
+| UUIDv7 для Comments | ✅ |
+| Draft / Published при создании | ✅ |
+| Categories DB + выбор категории | ✅ |
+| Tags + normalization + pivot | ✅ |
+| Несколько изображений | ✅ |
+| Реальная MIME-проверка через `finfo` | ✅ |
+| Transaction Create Post + tags + images | ✅ |
+| 10 posts / 24h rate limit | ✅ |
+| Activity log для `post_created` | ✅ |
+| Activity log для `post_updated` | ✅ |
+| Activity log для `post_deleted` | ✅ |
+| Activity log для `post_restored` | ✅ |
+| Activity log для `comment_deleted` | ✅ |
+| Feed | ✅ |
+| Guest feed | ✅ |
+| Guest может открыть published Post | ✅ |
+| Search title/content | ✅ |
+| Category filter | ✅ |
+| Tag filter | ✅ |
+| Author filter по `public_slug` | ✅ |
+| Newest / liked / commented sorting | ✅ |
+| Pagination + сохранение GET filters | ✅ |
+| Like/comment counts в feed | ✅ |
+| Posts пользователя внутри Profile | ✅ |
+| Author name → Profile | ✅ |
+| Edit own Post | ✅ |
+| Change draft/published/archived | ✅ |
+| Delete own Post | ✅ |
+| Soft Delete Post | ✅ |
+| Deleted posts скрыты из feed/profile/public page | ✅ |
+| Admin deleted posts page | ✅ |
+| Admin restore deleted posts | ✅ |
+| Comments | ✅ |
+| Guest читает Comments | ✅ |
+| Comment только для published Post | ✅ |
+| Comment verified-user check | ✅ |
+| Comment 5/min limit | ✅ |
+| Edit own Comment | ✅ |
+| Delete own Comment | ✅ |
+| Post owner может удалить чужой Comment | ✅ |
+| Moderator/Admin может удалить Comment | ✅ |
+| Soft Delete Comment | ✅ |
+| Nested Replies | ✅ |
+| Максимум 2 уровня replies | ✅ |
+| Reply-to-reply нормализуется к parent | ✅ |
+| Parent из другого Post отклоняется | ✅ |
+| Delete parent → replies soft-delete | ✅ |
+| Like / Unlike | ✅ |
+| Один like на `(post_id, user_id)` | ✅ DB `PRIMARY KEY` |
+| Like count | ✅ |
+| Current-user liked state | ✅ |
+| Guest видит like count без кнопки | ✅ |
+| Draft / Archived нельзя Like | ✅ |
+| Like через AJAX без reload | ⏳ потом, оптимизация |
+| Admin Category CRUD | ❌ ← **сейчас** |
+| Reports Posts | ❌ |
+| Reports Comments | ❌ |
+| Duplicate report protection | ❌ |
+| Moderation page for reports | ❌ |
+| Moderator hide Post | ❌ |
+| Полный moderation workflow Comment | 🟡 permission/delete уже есть |
+| Failed login 5/15 min limit | ❌ |
+| Full Activity Log requirements | 🟡 частично |
+| Admin Activity Log pagination/filter | ❌ |
+| Feed performance ≤ ~5 queries | 🟡 финальная проверка нужна |
+| `schema.sql` in repository | ❌ |
+| Skills | ❌ — files exist but are 0 bytes |
+| Experience | ❌ — files exist but are 0 bytes |
+| Notifications | ❌ |

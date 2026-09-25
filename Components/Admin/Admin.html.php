@@ -64,6 +64,14 @@
                     Audit Log
                 </a>
 
+                <a
+                    href="/Components/Categories/AdminCategories.php"
+                    class="admin-button">
+
+                    Manage Categories
+
+                </a>
+
             </div>
 
         </section>

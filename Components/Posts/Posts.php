@@ -9,7 +9,7 @@ use Ramsey\Uuid\Uuid;
 
 $currentUserId = currentUserId();
 
-$perPage = 6;
+$perPage = 5;
 
 $page = filter_input(
     INPUT_GET,

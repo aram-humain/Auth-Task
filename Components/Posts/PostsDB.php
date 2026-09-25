@@ -5,8 +5,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/upload.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/cloudinary.php';
 
-// requireLogin();
-// $userId = currentUserId();
 
 function createPost(PDO $pdo, string $publicId, int $userId, string  $title, int $categoryId, string $content, string $status): int
 {

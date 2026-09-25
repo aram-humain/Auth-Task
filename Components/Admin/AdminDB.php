@@ -1,6 +1,5 @@
 <?php
 
-// new function #1 instead of getAllUsers
 function getUsers(
     PDO $pdo,
     string $search,
@@ -56,7 +55,6 @@ function getUsers(
     return $stmt->fetchAll();
 }
 
-// new function #2 instead of getAllUsers
 function getUsersCount(PDO $pdo, string $search): int 
 {
     $stmt = $pdo->prepare('
