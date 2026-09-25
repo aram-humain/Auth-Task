@@ -1,6 +1,7 @@
 <?php
 
 /** @var array $user */
+/** @var int $unreadNotificationCount */
 
 ?>
 
@@ -173,6 +174,28 @@
                     href="/Components/Profile/Profile.php"
                     class="dashboard-action">
                     Profile
+                </a>
+
+                <a
+                    href="/Components/Notifications/Notifications.php"
+                    class="dashboard-action dashboard-notification-action">
+
+                    Notifications
+
+                    <?php if ($unreadNotificationCount > 0): ?>
+
+                        <span class="dashboard-notification-badge">
+
+                            <?= htmlspecialchars(
+                                (string) $unreadNotificationCount,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
+                        </span>
+
+                    <?php endif; ?>
+
                 </a>
 
             </div>

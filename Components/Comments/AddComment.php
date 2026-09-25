@@ -11,6 +11,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/flash.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/rate_limit.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Notifications/NotificationDB.php';
+
 
 requireLogin();
 
@@ -77,7 +79,21 @@ if($commentAttempt >= 5) {
 try {
     $pdo->beginTransaction();
 
-    createComment($pdo, (int) $post['id'], $userId, $content);
+    $comment = createComment(
+        $pdo,
+        (int) $post['id'],
+        $userId,
+        $content
+    );
+
+    createNotification(
+        $pdo,
+        (int) $post['user_id'],
+        $userId,
+        'post_comment',
+        (int) $post['id'],
+        (int) $comment['id']
+    );
 
     recordRateLimitAttempt($pdo, 'comment_create', $userId, null, $_SERVER['REMOTE_ADDR'] ?? null);
 

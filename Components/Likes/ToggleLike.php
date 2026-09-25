@@ -7,12 +7,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/csrf.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/flash.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Likes/LikeDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Notifications/NotificationDB.php';
 
 use Ramsey\Uuid\Uuid;
 
 requireLogin();
 
-if(!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
     http_response_code(403);
     exit('Invalid CSRF token');
 }
@@ -21,7 +22,7 @@ $userId = currentUserId();
 
 $postUuid = trim($_POST['post_id'] ?? '');
 
-if($postUuid === '' || !Uuid::isValid($postUuid)) {
+if ($postUuid === '' || !Uuid::isValid($postUuid)) {
     http_response_code(404);
     exit('Post not found.');
 }
@@ -30,9 +31,9 @@ $postPublicId = Uuid::fromString($postUuid)->getBytes();
 
 $post = getPostByPublicId($pdo, $postPublicId);
 
-if(
+if (
     $post === null
-    || $post['deleted_at'] !== null 
+    || $post['deleted_at'] !== null
     || $post['status'] !== 'published'
 ) {
     http_response_code(404);
@@ -46,25 +47,50 @@ try {
 
     $alreadyLiked = hasUserLikedPost($pdo, $postId, $userId);
 
-    if($alreadyLiked) {
-        removePostLike($pdo, $postId, $userId);
-        setFlash('success', 'Like removed.');
-    } else {
-        addPostLike($pdo, $postId, $userId);
+    if ($alreadyLiked) {
 
-        setFlash('success', 'Post liked.');
+        removePostLike(
+            $pdo,
+            $postId,
+            $userId
+        );
+
+        setFlash(
+            'success',
+            'Like removed.'
+        );
+    } else {
+
+        addPostLike(
+            $pdo,
+            $postId,
+            $userId
+        );
+
+        createNotification(
+            $pdo,
+            (int) $post['user_id'],
+            $userId,
+            'post_like',
+            $postId
+        );
+
+        setFlash(
+            'success',
+            'Post liked.'
+        );
     }
 
     $pdo->commit();
 
-     header(
+    header(
         'Location: /Components/Posts/Post.php?id='
-        . urlencode($postUuid)
+            . urlencode($postUuid)
     );
 
     exit;
 } catch (Throwable $exception) {
-    if($pdo->inTransaction()) {
+    if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 

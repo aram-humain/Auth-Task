@@ -8,6 +8,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/flash.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/rate_limit.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Notifications/NotificationDB.php';
 
 use Ramsey\Uuid\Uuid;
 
@@ -217,6 +218,15 @@ try {
         $userId,
         $content,
         $normalizedParentId
+    );
+
+    createNotification(
+        $pdo,
+        (int) $parentComment['user_id'],
+        $userId,
+        'comment_reply',
+        (int) $post['id'],
+        (int) $reply['id']
     );
 
 

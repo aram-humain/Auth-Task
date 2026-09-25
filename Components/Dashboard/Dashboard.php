@@ -2,6 +2,7 @@
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Notifications/NotificationDB.php';
 
 
 requireLogin();
@@ -40,5 +41,11 @@ if ($user['verified_at'] === null) {
 }
 
 requirePermission($pdo, 'view_dashboard');
+
+$unreadNotificationCount =
+    getUnreadNotificationCount(
+        $pdo,
+        (int) currentUserId()
+    );
 
 require_once __DIR__ . '/Dashboard.html.php';

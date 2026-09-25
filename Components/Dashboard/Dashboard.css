@@ -194,6 +194,39 @@ body {
     transform: translateY(0);
 }
 
+.dashboard-notification-action {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.dashboard-notification-badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 21px;
+    height: 21px;
+
+    padding:
+        0 6px;
+
+    border-radius: 999px;
+
+    background:
+        #ffffff;
+
+    color:
+        var(--primary-color);
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
 @media (max-width: 600px) {
 
     .dashboard-card {

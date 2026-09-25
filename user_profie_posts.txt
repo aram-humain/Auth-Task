@@ -1043,7 +1043,5 @@ Features:
 | Старые `users.name` места исправлены на Profile | ✅ |
 | Feed performance ≤ ~5 queries | ✅ |
 | `schema.sql` in repository | ✅ |
-| Root `/moderator.php` route как в формулировке задания | ⏳ можно добавить в конце |
-| Skills | ❌ extra / не относится к основному Task 5 |
-| Experience | ❌ extra |
+| Root `/moderator.php` route как в формулировке задания | | `schema.sql` in repository | ✅ | |
 | Notifications | ❌ extra |
