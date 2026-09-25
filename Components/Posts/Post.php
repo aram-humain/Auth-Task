@@ -3,12 +3,12 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/csrf.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/flash.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
 
-use Egulias\EmailValidator\Result\Reason\CommentsInIDRight;
 use Ramsey\Uuid\Uuid;
 
 $uuid = trim($_GET['id'] ?? '');
@@ -77,5 +77,11 @@ $comments = getPostComments($pdo, (int) $post['id']);
 $csrfToken = csrfToken();
 
 $canComment = $viewerUserId !== null && $post['deleted_at'] === null && $post['status'] === 'published';
+
+$flashSuccess = getFlash('success');
+
+$flashError = getFlash('error');
+
+$canModerateComments = $viewerUserId !== null && can($pdo, 'moderate_comments');
 
 require_once __DIR__ . '/Post.html.php';

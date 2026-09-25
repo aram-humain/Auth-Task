@@ -47,21 +47,21 @@ if($post === null || $post['deleted_at'] !== null || $post['status'] !== 'publis
 if(!isUserVerified($pdo, $userId)) {
     setFlash('error', 'You must verify your email before commenting.');
 
-    header('Location: /Components/Posts/Posts.php?id=' . urlencode($uuid));
+    header('Location: /Components/Posts/Post.php?id=' . urlencode($uuid));
     exit;
 }
 
 if($content === '') {
     setFlash('error', 'Comment cannot be empty');
 
-    header('Location: /Components/Posts/Posts.php?id=' . urlencode($uuid));
+    header('Location: /Components/Posts/Post.php?id=' . urlencode($uuid));
     exit;
 }
 
 if(mb_strlen($content) > 2000) {
     setFlash('error', 'Comment is too long');
 
-    header('Location: /Components/Posts/Posts.php?id=' . urlencode($uuid));
+    header('Location: /Components/Posts/Post.php?id=' . urlencode($uuid));
     exit;
 }
 
@@ -70,7 +70,7 @@ $commentAttempt = countRecentAttempts($pdo, 'comment_create', 60, $userId);
 if($commentAttempt >= 5) {
     setFlash('error', 'Too many comments. Please wait before comment again');
 
-    header('Location: /Components/Posts/Posts.php?id=' . urlencode($uuid));
+    header('Location: /Components/Posts/Post.php?id=' . urlencode($uuid));
     exit;
 }
 
@@ -85,7 +85,7 @@ try {
 
     setFlash('success', 'Comment added successfully');
 
-    header('Location: /Components/Posts/Posts.php?id=' . urlencode($uuid) . '#comments');
+    header('Location: /Components/Posts/Post.php?id=' . urlencode($uuid) . '#comments');
     exit;
     
 } catch(Throwable $exception) {

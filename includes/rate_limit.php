@@ -9,39 +9,56 @@ function countRecentAttempts(
     ?string $identifier = null,
     ?string $ipAddress = null
 ): int {
-    $cutoff = date(
-        'Y-m-d H:i:s',
-        time() - $seconds
-    );
 
-    $sql = '
+    $seconds = max(1, (int) $seconds);
+
+    $sql = "
         SELECT COUNT(*)
         FROM rate_limit_attempts
         WHERE action = :action
-          AND created_at >= :cutoff
-    ';
+          AND created_at >= DATE_SUB(
+              CURRENT_TIMESTAMP,
+              INTERVAL {$seconds} SECOND
+          )
+    ";
 
     $params = [
-        'action' => $action,
-        'cutoff' => $cutoff
+        'action' => $action
     ];
 
+
     if ($userId !== null) {
-        $sql .= ' AND user_id = :user_id';
+
+        $sql .= "
+            AND user_id = :user_id
+        ";
+
         $params['user_id'] = $userId;
     }
 
+
     if ($identifier !== null) {
-        $sql .= ' AND identifier = :identifier';
+
+        $sql .= "
+            AND identifier = :identifier
+        ";
+
         $params['identifier'] = $identifier;
     }
 
+
     if ($ipAddress !== null) {
-        $sql .= ' AND ip_address = :ip_address';
+
+        $sql .= "
+            AND ip_address = :ip_address
+        ";
+
         $params['ip_address'] = $ipAddress;
     }
 
+
     $statement = $pdo->prepare($sql);
+
     $statement->execute($params);
 
     return (int) $statement->fetchColumn();

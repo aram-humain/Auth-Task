@@ -1,0 +1,203 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.edit-comment-page {
+    width: 100%;
+    max-width: 700px;
+
+    margin: 0 auto;
+
+    padding: 70px 20px 40px;
+}
+
+.edit-comment-card {
+    overflow: hidden;
+
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+
+    background: var(--card-color);
+
+    box-shadow: var(--shadow);
+}
+
+.edit-comment-header {
+    padding: 24px 28px;
+
+    border-bottom:
+        1px solid
+        var(--border-color);
+}
+
+.edit-comment-header h1 {
+    margin: 0 0 6px;
+
+    font-size: 26px;
+}
+
+.edit-comment-header p {
+    margin: 0;
+
+    color: var(--secondary-text);
+}
+
+.edit-comment-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 28px;
+}
+
+.edit-comment-form label {
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+.edit-comment-form textarea {
+    width: 100%;
+
+    min-height: 180px;
+
+    resize: vertical;
+
+    padding: 13px 14px;
+
+    border:
+        1px solid
+        var(--border-color);
+
+    border-radius: 9px;
+
+    outline: none;
+
+    background: var(--bg-color);
+
+    color: var(--text-color);
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+.edit-comment-form textarea:focus {
+    border-color: var(--primary-color);
+}
+
+.edit-comment-error {
+    margin:
+        20px
+        28px
+        0;
+
+    padding: 12px 14px;
+
+    border:
+        1px solid
+        var(--danger-color);
+
+    border-radius: 8px;
+
+    background:
+        rgba(
+            220,
+            38,
+            38,
+            0.08
+        );
+
+    color: var(--danger-color);
+}
+
+.edit-comment-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 10px;
+}
+
+.cancel-button,
+.save-button {
+    min-height: 40px;
+
+    padding: 9px 16px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.cancel-button {
+    border:
+        1px solid
+        var(--border-color);
+
+    background: var(--bg-color);
+
+    color: var(--text-color);
+}
+
+.save-button {
+    border:
+        1px solid
+        var(--primary-color);
+
+    background: var(--primary-color);
+
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+@media (max-width: 700px) {
+
+    .edit-comment-page {
+        padding:
+            70px
+            12px
+            30px;
+    }
+
+    .edit-comment-header,
+    .edit-comment-form {
+        padding: 20px;
+    }
+
+    .edit-comment-actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancel-button,
+    .save-button {
+        width: 100%;
+
+        text-align: center;
+    }
+}

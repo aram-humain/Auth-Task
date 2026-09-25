@@ -11,7 +11,9 @@
 /** @var int $viewerUserId */
 /** @var bool $canComment */
 /** @var array $comments */
-
+/** @var string $flashError */
+/** @var string $flashSuccess */
+/** @var null|bool $canModerateComments */
 
 ?>
 
@@ -246,6 +248,34 @@
                 class="comments-section"
                 id="comments">
 
+                <?php if ($flashSuccess !== null): ?>
+
+                    <div class="comment-message comment-message-success">
+
+                        <?= htmlspecialchars(
+                            $flashSuccess,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>
+
+                    </div>
+
+                <?php endif; ?>
+
+
+                <?php if ($flashError !== null): ?>
+
+                    <div class="comment-message comment-message-error">
+
+                        <?= htmlspecialchars(
+                            $flashError,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>
+
+                    </div>
+
+                <?php endif; ?>
                 <div class="comments-header">
 
                     <h2>
@@ -349,9 +379,15 @@
                                 $commentAuthor = 'User';
                             }
 
+                            $isCommentOwner = $viewerUserId !== null && (int) $comment['user_id'] === $viewerUserId;
+
+
+                            $canDeleteComment = $isCommentOwner || $isOwner || $canModerateComments;
                             ?>
 
-                            <article class="comment-card">
+                            <article
+                                class="comment-card"
+                                id="comment-<?= (int) $comment['id'] ?>">
 
                                 <div class="comment-card-header">
 
@@ -399,6 +435,70 @@
                                     ) ?>
 
                                 </div>
+
+                                <?php if (
+                                    $isCommentOwner
+                                    || $canDeleteComment
+                                ): ?>
+
+                                    <div class="comment-actions">
+
+
+                                        <?php if ($isCommentOwner): ?>
+
+                                            <a
+                                                href="/Components/Comments/EditComment.php?id=<?= (int) $comment['id'] ?>"
+                                                class="comment-edit-button">
+
+                                                Edit
+
+                                            </a>
+
+                                        <?php endif; ?>
+
+
+                                        <?php if ($canDeleteComment): ?>
+
+                                            <form
+                                                method="POST"
+                                                action="/Components/Comments/DeleteComment.php"
+                                                class="comment-delete-form"
+                                                onsubmit="return confirm('Delete this comment?');">
+
+
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="<?= htmlspecialchars(
+                                                                $csrfToken,
+                                                                ENT_QUOTES,
+                                                                'UTF-8'
+                                                            ) ?>">
+
+
+                                                <input
+                                                    type="hidden"
+                                                    name="comment_id"
+                                                    value="<?= (int) $comment['id'] ?>">
+
+
+                                                <button
+                                                    type="submit"
+                                                    class="comment-delete-button">
+
+                                                    Delete
+
+                                                </button>
+
+
+                                            </form>
+
+                                        <?php endif; ?>
+
+
+                                    </div>
+
+                                <?php endif; ?>
 
                             </article>
 

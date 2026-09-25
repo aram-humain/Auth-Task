@@ -65,3 +65,91 @@ function getPostComments(
 
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function getCommentById(
+    PDO $pdo,
+    int $commentId
+): ?array {
+    $statement = $pdo->prepare(
+        "SELECT
+        c.id,
+        c.post_id,
+        c.user_id,
+        c.parent_id,
+        c.content,
+        c.created_at,
+        c.updated_at,
+        c.deleted_at,
+        
+        p.user_id AS post_user__id,
+        p.public_id AS post_public_id,
+        p.status AS post_status,
+        p.deleted_at AS post_deleted_at
+        
+        FROM comments c
+        
+        JOIN posts p
+            on p.id = c.post_id
+            
+        WHERE c.id = :comment_id
+        
+        LIMIT 1"
+    );
+
+    $statement->execute([
+        'comment_id' => $commentId
+    ]);
+
+    $comment = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return $comment ?: null;
+}
+
+
+function updateOwnComment(
+    PDO $pdo,
+    int $commentId,
+    int $userId,
+    string $content
+): bool {
+    $statement = $pdo->prepare(
+        "UPDATE comments
+        SET
+        content = :content,
+        updated_at = CURRENT_TIMESTAMP
+        
+        WHERE id = :comment_id
+        AND user_id = :user_id
+        AND deleted_at IS NULL"
+    );
+
+    $statement->execute([
+        'content' => $content,
+        'comment_id' => $commentId,
+        'user_id' => $userId
+    ]);
+
+    return $statement->rowCount() > 0;
+}
+
+function softDeleteComment(
+    PDO $pdo,
+    int $commentId
+): bool {
+    $statement = $pdo->prepare(
+        "UPDATE comments
+        
+        SET
+        deleted_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+        
+        WHERE id = :comment_id
+        AND deleted_at IS NULL"
+    );
+
+    $statement->execute([
+        'comment_id' => $commentId
+    ]);
+
+    return $statement->rowCount() > 0;
+}
