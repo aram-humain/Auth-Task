@@ -8,6 +8,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Likes/LikeDB.php';
 
 use Ramsey\Uuid\Uuid;
 
@@ -74,6 +75,29 @@ if ($authorName === '') {
 
 $comments = getPostComments($pdo, (int) $post['id']);
 
+foreach ($comments as &$comment) {
+
+    $comment['uuid'] =
+        Uuid::fromBytes(
+            $comment['public_id']
+        )->toString();
+}
+
+unset($comment);
+
+$topLevelComments = [];
+$repliesByParent = [];
+
+foreach($comments as $comment) {
+    if($comment['parent_id'] === null) {
+        $topLevelComments[] = $comment;
+    } else {
+        $parentId = (int) $comment['parent_id'];
+
+        $repliesByParent[$parentId][] = $comment;
+    }
+}
+
 $csrfToken = csrfToken();
 
 $canComment = $viewerUserId !== null && $post['deleted_at'] === null && $post['status'] === 'published';
@@ -83,5 +107,25 @@ $flashSuccess = getFlash('success');
 $flashError = getFlash('error');
 
 $canModerateComments = $viewerUserId !== null && can($pdo, 'moderate_comments');
+
+$likeCount = getPostLikeCount(
+    $pdo,
+    (int) $post['id']
+);
+
+
+$hasLiked =
+    $viewerUserId !== null
+    && hasUserLikedPost(
+        $pdo,
+        (int) $post['id'],
+        $viewerUserId
+    );
+
+
+$canLike =
+    $viewerUserId !== null
+    && $post['deleted_at'] === null
+    && $post['status'] === 'published';
 
 require_once __DIR__ . '/Post.html.php';

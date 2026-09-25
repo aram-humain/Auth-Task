@@ -11,71 +11,159 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
 
 use Ramsey\Uuid\Uuid;
 
+
 requireLogin();
 
-if($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
     http_response_code(405);
-    exit('Method not allowed');
+
+    exit('Method not allowed.');
 }
 
-if(!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+
+if (!verifyCsrfToken(
+    $_POST['csrf_token'] ?? null
+)) {
+
     http_response_code(403);
-    exit('Invalid CSRF token');
+
+    exit('Invalid CSRF token.');
 }
+
 
 $userId = currentUserId();
 
-$commentId = filter_input(INPUT_POST, 'comment_id', FILTER_VALIDATE_INT);
 
-if (!$commentId) {
+
+$commentUuid = trim(
+    $_POST['comment_uuid'] ?? ''
+);
+
+
+if (
+    $commentUuid === ''
+    || !Uuid::isValid($commentUuid)
+) {
+
     http_response_code(404);
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Error/403.php';
-    exit('Comment not found');
+
+    exit('Comment not found.');
 }
 
-$comment = getCommentById($pdo, $commentId);
 
-if($comment === null || $comment['deleted_at'] !== null){
+$commentPublicId =
+    Uuid::fromString(
+        $commentUuid
+    )->getBytes();
+
+$comment = getCommentByPublicId(
+    $pdo,
+    $commentPublicId
+);
+
+
+if (
+    $comment === null
+    || $comment['deleted_at'] !== null
+) {
+
     http_response_code(404);
-    exit('Comment not found');
+
+    exit('Comment not found.');
 }
 
-$isCommentOwner = (int) $comment['user_id'] === $userId;
 
-$isPostOwner = (int) $comment['post_user_id'] === $userId;
+$commentId = (int) $comment['id'];
 
-$canModerate = can($pdo, 'moderate_comments');
+$isCommentOwner =
+    (int) $comment['user_id']
+    === $userId;
 
-if(!$isCommentOwner && !$isPostOwner && !$canModerate) {
+
+$isPostOwner =
+    (int) $comment['post_user_id']
+    === $userId;
+
+
+$canModerate =
+    can(
+        $pdo,
+        'moderate_comments'
+    );
+
+
+if (
+    !$isCommentOwner
+    && !$isPostOwner
+    && !$canModerate
+) {
+
     http_response_code(403);
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Error/403.php';
+
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/Components/Error/403.php';
+
     exit;
 }
 
-$postUuid = Uuid::fromBytes($comment['post_public_id'])->toString();
+
+$postUuid =
+    Uuid::fromBytes(
+        $comment['post_public_id']
+    )->toString();
+
 
 try {
+
     $pdo->beginTransaction();
 
-    $deleted = softDeleteComment($pdo, $commentId);
+    $deleted = softDeleteComment(
+        $pdo,
+        $commentId
+    );
 
-    if(!$deleted) {
-        throw new RuntimeException('Comment could not be deleted.');
+
+    if (!$deleted) {
+
+        throw new RuntimeException(
+            'Comment could not be deleted.'
+        );
     }
 
-    logActivity($pdo, $userId, 'comment_deleted', 'comment', $commentId, $_SERVER['REMOTE_ADDR'] ?? null);
+
+    logActivity(
+        $pdo,
+        $userId,
+        'comment_deleted',
+        'comment',
+        $commentId,
+        $_SERVER['REMOTE_ADDR'] ?? null
+    );
+
 
     $pdo->commit();
 
-    setFlash('success', 'Comment deleted successfully.');
 
-    header('Location: /Components/Posts/Post.php?id=' . urlencode($postUuid) . '#comments');
+    setFlash(
+        'success',
+        'Comment deleted successfully.'
+    );
+
+    header(
+        'Location: /Components/Posts/Post.php?id='
+            . urlencode($postUuid)
+            . '#comments'
+    );
 
     exit;
 } catch (Throwable $exception) {
-    if($pdo->inTransaction()) {
+
+    if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
+
 
     http_response_code(500);
 

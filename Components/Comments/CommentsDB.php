@@ -1,4 +1,7 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
+
+use Ramsey\Uuid\Uuid;
 
 function createComment(
     PDO $pdo,
@@ -6,29 +9,39 @@ function createComment(
     int $userId,
     string $content,
     ?int $parentId = null
-): int {
+): array {
+
+    $uuid = Uuid::uuid7();
+
     $statement = $pdo->prepare(
-        "INSERT INTO comments(
-        post_id,
-        user_id,
-        parent_id,
-        content)
-        
+        "INSERT INTO comments (
+            public_id,
+            post_id,
+            user_id,
+            parent_id,
+            content
+        )
         VALUES (
-        :post_id,
-        :user_id,
-        :parent_id,
-        :content)"
+            :public_id,
+            :post_id,
+            :user_id,
+            :parent_id,
+            :content
+        )"
     );
 
     $statement->execute([
+        'public_id' => $uuid->getBytes(),
         'post_id' => $postId,
         'user_id' => $userId,
         'parent_id' => $parentId,
         'content' => $content
     ]);
 
-    return (int) $pdo->lastInsertId();
+    return [
+        'id' => (int) $pdo->lastInsertId(),
+        'uuid' => $uuid->toString()
+    ];
 }
 
 
@@ -39,12 +52,14 @@ function getPostComments(
     $statement = $pdo->prepare(
         "SELECT
             c.id,
+            c.public_id,
             c.post_id,
             c.user_id,
             c.parent_id,
             c.content,
             c.created_at,
             c.updated_at,
+            
             
             pr.first_name,
             pr.last_name,
@@ -66,6 +81,47 @@ function getPostComments(
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getCommentByPublicId(
+    PDO $pdo,
+    string $publicId
+): ?array {
+
+    $statement = $pdo->prepare(
+        "SELECT
+            c.id,
+            c.public_id,
+            c.post_id,
+            c.user_id,
+            c.parent_id,
+            c.content,
+            c.created_at,
+            c.updated_at,
+            c.deleted_at,
+
+            p.user_id AS post_user_id,
+            p.public_id AS post_public_id,
+            p.status AS post_status,
+            p.deleted_at AS post_deleted_at
+
+         FROM comments c
+
+         JOIN posts p
+            ON p.id = c.post_id
+
+         WHERE c.public_id = :public_id
+
+         LIMIT 1"
+    );
+
+    $statement->execute([
+        'public_id' => $publicId
+    ]);
+
+    $comment = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return $comment ?: null;
+}
+
 function getCommentById(
     PDO $pdo,
     int $commentId
@@ -81,7 +137,7 @@ function getCommentById(
         c.updated_at,
         c.deleted_at,
         
-        p.user_id AS post_user__id,
+        p.user_id AS post_user_id,
         p.public_id AS post_public_id,
         p.status AS post_status,
         p.deleted_at AS post_deleted_at
@@ -138,18 +194,86 @@ function softDeleteComment(
 ): bool {
     $statement = $pdo->prepare(
         "UPDATE comments
+
+         SET
+            deleted_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+
+         WHERE (
+                id = :comment_id
+                OR parent_id = :parent_id
+         )
+           AND deleted_at IS NULL"
+    );
+
+    $statement->execute([
+        'comment_id' => $commentId,
+        'parent_id' => $commentId
+    ]);
+
+    return $statement->rowCount() > 0;
+}
+
+function getActiveCommentByid(
+    PDO $pdo,
+    int $commentId
+): ?array {
+    $statement = $pdo->prepare(
+        "SELECT 
+        id,
+        post_id,
+        user_id,
+        parent_id,
+        content,
+        created_at,
+        updated_at
         
-        SET
-        deleted_at = CURRENT_TIMESTAMP,
-        updated_at = CURRENT_TIMESTAMP
+        FROM comments
         
         WHERE id = :comment_id
-        AND deleted_at IS NULL"
+        AND deleted_AT IS NULL
+        
+        LIMIT 1"
     );
 
     $statement->execute([
         'comment_id' => $commentId
     ]);
 
-    return $statement->rowCount() > 0;
+    $comment = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return $comment ?: null;
+}
+
+function getActiveCommentByPublicId(
+    PDO $pdo,
+    string $publicId
+): ?array {
+
+    $statement = $pdo->prepare(
+        "SELECT
+            id,
+            public_id,
+            post_id,
+            user_id,
+            parent_id,
+            content,
+            created_at,
+            updated_at
+
+         FROM comments
+
+         WHERE public_id = :public_id
+           AND deleted_at IS NULL
+
+         LIMIT 1"
+    );
+
+    $statement->execute([
+        'public_id' => $publicId
+    ]);
+
+    $comment = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return $comment ?: null;
 }
