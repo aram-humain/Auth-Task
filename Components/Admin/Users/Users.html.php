@@ -185,8 +185,20 @@
                                     </td>
 
                                     <td>
+                                        <?php
+
+                                        $fullName = trim(
+                                            ($user['first_name'] ?? '')
+                                                . ' '
+                                                . ($user['last_name'] ?? '')
+                                        );
+
+                                        ?>
+
                                         <?= htmlspecialchars(
-                                            $user['first_name'] ??  '',
+                                            $fullName !== ''
+                                                ? $fullName
+                                                : '—',
                                             ENT_QUOTES,
                                             'UTF-8'
                                         ) ?>

@@ -124,7 +124,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         setFlash('success', 'Post created successfully.');
 
-        header('Location: /Components/Dashboard/Dashboard.php');
+        header('Location: /Components/Posts/Posts.php');
 
         exit;
         } catch(Throwable $exception) {

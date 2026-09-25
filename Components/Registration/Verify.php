@@ -30,13 +30,27 @@ if ($token !== '') {
             try {
                 $newToken = bin2hex(random_bytes(32));
                 $pdo->beginTransaction();
-                $name = replaceVerificationToken($pdo, $email, $newToken);
+                $recipientName =
+                    replaceVerificationToken(
+                        $pdo,
+                        $email,
+                        $newToken
+                    );
 
-                if ($name === null) {
-                    throw new RuntimeException('Verification request was not found.');
+
+                if ($recipientName === null) {
+
+                    throw new RuntimeException(
+                        'Verification request was not found.'
+                    );
                 }
 
-                sendVerificationLinkEmail($email, $name, $newToken);
+
+                sendVerificationLinkEmail(
+                    $email,
+                    $recipientName,
+                    $newToken
+                );
                 $pdo->commit();
                 $success = 'A new verification link has been sent.';
             } catch (Throwable $exception) {

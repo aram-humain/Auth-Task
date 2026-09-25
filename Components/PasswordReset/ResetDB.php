@@ -1,5 +1,7 @@
 <?php
 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/activity_log.php';
+
 function findResetRequest(PDO $pdo, string $token): ?array
 {
     $statement = $pdo->prepare(
@@ -21,7 +23,7 @@ function findResetRequest(PDO $pdo, string $token): ?array
     return null;
 }
 
-function updatePasswordAndConsumeToken(PDO $pdo, int $resetId, int $userId, string $password): void
+function updatePasswordAndConsumeToken(PDO $pdo, int $resetId, int $userId, string $password, ?string $ipAddress = null): void
 {
     $pdo->beginTransaction();
 
@@ -43,6 +45,15 @@ function updatePasswordAndConsumeToken(PDO $pdo, int $resetId, int $userId, stri
         if ($tokenStatement->rowCount() !== 1) {
             throw new RuntimeException('Reset token has already been used.');
         }
+
+        logActivity(
+            $pdo,
+            $userId,
+            'password_reset',
+            'user',
+            $userId,
+            $ipAddress
+        );
 
         $pdo->commit();
     } catch (Throwable $exception) {

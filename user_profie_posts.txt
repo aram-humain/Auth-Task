@@ -951,7 +951,6 @@ Features:
 
 
 ******************************************************************
-
 | Функциональность | Сейчас |
 |---|---|
 | Profile create/view/edit | ✅ |
@@ -974,6 +973,9 @@ Features:
 | Activity log для `post_deleted` | ✅ |
 | Activity log для `post_restored` | ✅ |
 | Activity log для `comment_deleted` | ✅ |
+| Activity log для `failed_login` | ✅ |
+| Activity log для `password_reset` | ✅ |
+| Activity log для `role_changed` | ✅ |
 | Feed | ✅ |
 | Guest feed | ✅ |
 | Guest может открыть published Post | ✅ |
@@ -1009,24 +1011,39 @@ Features:
 | Parent из другого Post отклоняется | ✅ |
 | Delete parent → replies soft-delete | ✅ |
 | Like / Unlike | ✅ |
-| Один like на `(post_id, user_id)` | ✅ DB `PRIMARY KEY` |
+| Один like на `(post_id, user_id)` | ✅ |
 | Like count | ✅ |
 | Current-user liked state | ✅ |
 | Guest видит like count без кнопки | ✅ |
 | Draft / Archived нельзя Like | ✅ |
-| Like через AJAX без reload | ⏳ потом, оптимизация |
-| Admin Category CRUD | ❌ ← **сейчас** |
-| Reports Posts | ❌ |
-| Reports Comments | ❌ |
-| Duplicate report protection | ❌ |
-| Moderation page for reports | ❌ |
-| Moderator hide Post | ❌ |
-| Полный moderation workflow Comment | 🟡 permission/delete уже есть |
-| Failed login 5/15 min limit | ❌ |
-| Full Activity Log requirements | 🟡 частично |
-| Admin Activity Log pagination/filter | ❌ |
-| Feed performance ≤ ~5 queries | 🟡 финальная проверка нужна |
+| Like через AJAX без reload | ⏳ необязательная оптимизация |
+| Admin Category CRUD | ✅ |
+| Reports Posts | ✅ |
+| Reports Comments | ✅ |
+| Reports Replies | ✅ |
+| Duplicate report protection | ✅ |
+| Автор не может пожаловаться на свой контент | ✅ |
+| Moderation page for reports | ✅ |
+| Moderator видит reporter + reason | ✅ |
+| Moderator hide Post | ✅ |
+| Moderator hide Comment | ✅ |
+| Hide → report `action_taken` | ✅ |
+| Dismiss Post Report | ✅ |
+| Dismiss Comment Report | ✅ |
+| Dismiss → `dismissed`, контент остаётся | ✅ |
+| Moderation через permissions, не role string | ✅ |
+| Failed login 5 / 15 min | ✅ |
+| Failed login limit по email | ✅ |
+| Failed login limit по IP | ✅ |
+| Failed login attempts в DB | ✅ |
+| Full Activity Log requirements | ✅ |
+| Admin Activity Log page | ✅ |
+| Admin Activity Log filter by user | ✅ |
+| Admin Activity Log pagination | ✅ |
+| Старые `users.name` места исправлены на Profile | ✅ |
+| Feed performance ≤ ~5 queries | 🟡 **следующий блок** |
 | `schema.sql` in repository | ❌ |
-| Skills | ❌ — files exist but are 0 bytes |
-| Experience | ❌ — files exist but are 0 bytes |
-| Notifications | ❌ |
+| Root `/moderator.php` route как в формулировке задания | ⏳ можно добавить в конце |
+| Skills | ❌ extra / не относится к основному Task 5 |
+| Experience | ❌ extra |
+| Notifications | ❌ extra |

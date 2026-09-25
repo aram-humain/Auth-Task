@@ -43,7 +43,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'You cannot cahnge your own role';
     } else {
         try {
-            changeUserRole($pdo, $userId, $roleId, currentUserId());
+            changeUserRole($pdo, $userId, $roleId, currentUserId(), $_SERVER['REMOTE_ADDR'] ?? null);
 
             setFlash('success', 'Role updated successfully');
 

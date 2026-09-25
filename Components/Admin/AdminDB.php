@@ -1,5 +1,8 @@
 <?php
 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/activity_log.php';
+
+
 function getUsers(
     PDO $pdo,
     string $search,
@@ -8,99 +11,113 @@ function getUsers(
 ): array {
 
     $stmt = $pdo->prepare(
-        '
-    SELECT
-        u.id,
-        prof.first_name,
-        u.email,
-        u.created_at,
-        ev.verified_at,
-        GROUP_CONCAT(
-            DISTINCT r.name
-            ORDER BY r.name
-            SEPARATOR ", "
-        ) AS role,
-        MIN(r.id) AS role_id
-    FROM users u
-    
-    LEFT JOIN profiles prof
-        ON prof.user_id = u.id
-    LEFT JOIN email_verifications ev
-        ON ev.user_id = u.id
-    LEFT JOIN user_roles ur
-        ON ur.user_id = u.id
-    LEFT JOIN roles r
-        ON r.id = ur.role_id
-        
-    WHERE (
-        prof.first_name LIKE :search
-        OR u.email LIKE :search
-    )
-    
-    GROUP BY
-        u.id,
-        prof.first_name,
-        u.email,
-        u.created_at,
-        ev.verified_at
-        
-    ORDER BY u.id
-    
-    LIMIT ' . $limit .'
-    OFFSET '. $offset
+        "SELECT
+            u.id,
+
+            prof.first_name,
+            prof.last_name,
+
+            u.email,
+            u.created_at,
+
+            ev.verified_at,
+
+            GROUP_CONCAT(
+                DISTINCT r.name
+                ORDER BY r.name
+                SEPARATOR ', '
+            ) AS role,
+
+            MIN(r.id) AS role_id
+
+         FROM users u
+
+         LEFT JOIN profiles prof
+            ON prof.user_id = u.id
+
+         LEFT JOIN email_verifications ev
+            ON ev.user_id = u.id
+
+         LEFT JOIN user_roles ur
+            ON ur.user_id = u.id
+
+         LEFT JOIN roles r
+            ON r.id = ur.role_id
+
+         WHERE (
+                prof.first_name LIKE :search
+                OR prof.last_name LIKE :search
+                OR CONCAT_WS(
+                    ' ',
+                    prof.first_name,
+                    prof.last_name
+                ) LIKE :search
+                OR u.email LIKE :search
+         )
+
+         GROUP BY
+            u.id,
+            prof.first_name,
+            prof.last_name,
+            u.email,
+            u.created_at,
+            ev.verified_at
+
+         ORDER BY u.id
+
+         LIMIT {$limit}
+         OFFSET {$offset}"
     );
 
-    $stmt->execute(['search' => '%' . $search . '%']);
 
-    return $stmt->fetchAll();
+    $stmt->execute([
+        'search' =>
+            '%' . $search . '%'
+    ]);
+
+
+    return $stmt->fetchAll(
+        PDO::FETCH_ASSOC
+    );
 }
 
-function getUsersCount(PDO $pdo, string $search): int 
-{
-    $stmt = $pdo->prepare('
-    SELECT COUNT(*)
-    FROM users
-    LEFT JOIN profiles ON profiles.user_id = users.id
-    WHERE profiles.first_name LIKE :search
-        OR email LIKE :search');
+function getUsersCount(
+    PDO $pdo,
+    string $search
+): int {
 
-    $stmt->execute(['search' => '%' . $search . '%']);
+    $stmt = $pdo->prepare(
+        "SELECT COUNT(*)
 
-    return (int) $stmt->fetchColumn();
+         FROM users u
 
+         LEFT JOIN profiles p
+            ON p.user_id = u.id
+
+         WHERE
+            p.first_name LIKE :search
+
+            OR p.last_name LIKE :search
+
+            OR CONCAT_WS(
+                ' ',
+                p.first_name,
+                p.last_name
+            ) LIKE :search
+
+            OR u.email LIKE :search"
+    );
+
+
+    $stmt->execute([
+        'search' =>
+            '%' . $search . '%'
+    ]);
+
+
+    return
+        (int) $stmt->fetchColumn();
 }
-
-
-// doesnt need after search+pagination implementation
-// function getAllUsers(PDO $pdo): array
-// {
-//     $stmt = $pdo->query(
-//     'SELECT
-//         u.id,
-//         u.name,
-//         u.email,
-//         u.created_at,
-//         ev.verified_at,
-//         GROUP_CONCAT(r.name ORDER BY r.name SEPARATOR ", ") AS role,
-//         MIN(r.id) AS role_id
-//     FROM users u 
-//     LEFT JOIN email_verifications ev
-//         ON ev.user_id = u.id
-//     LEFT JOIN user_roles ur
-//         ON ur.user_id = u.id
-//     LEFT JOIN roles r
-//         ON r.id = ur.role_id
-//     GROUP BY
-//         u.id,
-//         u.name,
-//         u.email,
-//         u.created_at,
-//         ev.verified_at
-//     ORDER BY u.id'
-//     );
-
-//     return $stmt->fetchAll();
-// }
 
 function getAllRoles(PDO $pdo): array
 {
@@ -147,37 +164,81 @@ function logAudit(
     ]);
 }
 
-function getAuditLogs(PDO $pdo): array
-{
+function getAuditLogs(
+    PDO $pdo
+): array {
+
     $stmt = $pdo->prepare(
-        'SELECT
-        al.id,
-        al.action,
-        al.old_value,
-        al.new_value,
-        al.created_at,
-        
-        actor.id AS actor_id,
-        actor.name AS actor_name,
-        
-        target.id AS target_id,
-        target.name AS target_name
-        
-        FROM audit_logs al
-        
-        INNER JOIN users actor
-        ON actor.id = al.actor_user_id
-        
-        LEFT JOIN users target
-        ON target.id = al.target_user_id
-        
-        ORDER BY al.id DESC'
+        "SELECT
+            al.id,
+            al.action,
+            al.old_value,
+            al.new_value,
+            al.created_at,
+
+            actor.id AS actor_id,
+
+            COALESCE(
+                NULLIF(
+                    TRIM(
+                        CONCAT_WS(
+                            ' ',
+                            actor_profile.first_name,
+                            actor_profile.last_name
+                        )
+                    ),
+                    ''
+                ),
+                actor.email
+            ) AS actor_name,
+
+            target.id AS target_id,
+
+            COALESCE(
+                NULLIF(
+                    TRIM(
+                        CONCAT_WS(
+                            ' ',
+                            target_profile.first_name,
+                            target_profile.last_name
+                        )
+                    ),
+                    ''
+                ),
+                target.email
+            ) AS target_name
+
+         FROM audit_logs al
+
+         INNER JOIN users actor
+            ON actor.id =
+               al.actor_user_id
+
+         LEFT JOIN profiles actor_profile
+            ON actor_profile.user_id =
+               actor.id
+
+         LEFT JOIN users target
+            ON target.id =
+               al.target_user_id
+
+         LEFT JOIN profiles target_profile
+            ON target_profile.user_id =
+               target.id
+
+         ORDER BY al.id DESC"
     );
 
-    return $stmt->fetchAll();
+
+    $stmt->execute();
+
+
+    return $stmt->fetchAll(
+        PDO::FETCH_ASSOC
+    );
 }
 
-function changeUserRole(PDO $pdo, int $userId, int $roleId, int $actorUserId): void
+function changeUserRole(PDO $pdo, int $userId, int $roleId, int $actorUserId, ?string $ipAddress = null): void
 {
     $pdo->beginTransaction();
 
@@ -259,7 +320,16 @@ function changeUserRole(PDO $pdo, int $userId, int $roleId, int $actorUserId): v
             $userId,
             'change_user_role',
             $oldRole['name'],
-            $newRole['name']
+            $newRole['name'],
+        );
+
+        logActivity(
+            $pdo,
+            $actorUserId,
+            'role_changed',
+            'user',
+            $userId,
+            $ipAddress
         );
 
         $pdo->commit();

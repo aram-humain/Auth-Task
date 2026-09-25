@@ -21,7 +21,7 @@ if ($token === '') {
             $errors[] = 'The password reset link is invalid or expired.';
         } else {
             try {
-                updatePasswordAndConsumeToken($pdo, $reset['id'], $reset['user_id'], $password);
+                updatePasswordAndConsumeToken($pdo, $reset['id'], $reset['user_id'], $password, $_SERVER['REMOTE_ADDR'] ?? null);
                 header('Location: ../Login/Login.php?reset=1');
                 exit;
             } catch (Throwable $exception) {

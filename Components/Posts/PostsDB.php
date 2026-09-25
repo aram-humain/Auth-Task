@@ -281,13 +281,124 @@ function getPostTags(PDO $pdo, int $postId): array
 }
 
 
+function getFeedFilterOptions(PDO $pdo): array
+{
+    $statement = $pdo->query(
+        "
+        SELECT
+            'category' AS item_type,
+            c.id AS item_id,
+            c.name AS value_one,
+            NULL AS value_two,
+            NULL AS public_slug
+
+        FROM categories c
+
+
+        UNION ALL
+
+
+        SELECT
+            'tag' AS item_type,
+            t.id AS item_id,
+            t.name AS value_one,
+            NULL AS value_two,
+            NULL AS public_slug
+
+        FROM tags t
+
+
+        UNION ALL
+
+
+        SELECT
+            'author' AS item_type,
+            pr.user_id AS item_id,
+            pr.first_name AS value_one,
+            pr.last_name AS value_two,
+            pr.public_slug
+
+        FROM profiles pr
+
+        WHERE EXISTS (
+            SELECT 1
+
+            FROM posts p
+
+            WHERE p.user_id = pr.user_id
+              AND p.status = 'published'
+              AND p.deleted_at IS NULL
+        )
+
+
+        ORDER BY
+            item_type,
+            value_one,
+            value_two
+        "
+    );
+
+
+    $rows = $statement->fetchAll(
+        PDO::FETCH_ASSOC
+    );
+
+
+    $result = [
+        'categories' => [],
+        'tags' => [],
+        'authors' => []
+    ];
+
+
+    foreach ($rows as $row) {
+
+        if ($row['item_type'] === 'category') {
+
+            $result['categories'][] = [
+                'id' => (int) $row['item_id'],
+                'name' => $row['value_one']
+            ];
+
+            continue;
+        }
+
+
+        if ($row['item_type'] === 'tag') {
+
+            $result['tags'][] = [
+                'id' => (int) $row['item_id'],
+                'name' => $row['value_one']
+            ];
+
+            continue;
+        }
+
+
+        if ($row['item_type'] === 'author') {
+
+            $result['authors'][] = [
+                'user_id' => (int) $row['item_id'],
+                'first_name' => $row['value_one'],
+                'last_name' => $row['value_two'],
+                'public_slug' => $row['public_slug']
+            ];
+        }
+    }
+
+
+    return $result;
+}
+
+
 function countFeedPosts(
     PDO $pdo,
     string $search = '',
     ?int $categoryId = null,
     ?int $tagId = null,
-    ?int $authorId = null
+    ?string $authorSlug = null
 ): int {
+
     $sql = "
         SELECT COUNT(*)
 
@@ -297,9 +408,12 @@ function countFeedPosts(
           AND p.deleted_at IS NULL
     ";
 
+
     $params = [];
 
+
     if ($search !== '') {
+
         $sql .= "
             AND (
                 p.title LIKE :search
@@ -311,7 +425,9 @@ function countFeedPosts(
             '%' . $search . '%';
     }
 
+
     if ($categoryId !== null) {
+
         $sql .= "
             AND p.category_id = :category_id
         ";
@@ -320,7 +436,9 @@ function countFeedPosts(
             $categoryId;
     }
 
+
     if ($tagId !== null) {
+
         $sql .= "
             AND EXISTS (
                 SELECT 1
@@ -332,22 +450,40 @@ function countFeedPosts(
             )
         ";
 
-        $params['tag_id'] = $tagId;
+        $params['tag_id'] =
+            $tagId;
     }
 
-    if ($authorId !== null) {
+
+    if ($authorSlug !== null) {
+
         $sql .= "
-        AND p.user_id = :author_id
-    ";
+            AND EXISTS (
+                SELECT 1
 
-        $params['author_id'] = $authorId;
+                FROM profiles pr_filter
+
+                WHERE pr_filter.user_id = p.user_id
+                  AND pr_filter.public_slug = :author_slug
+            )
+        ";
+
+        $params['author_slug'] =
+            $authorSlug;
     }
 
-    $statement = $pdo->prepare($sql);
 
-    $statement->execute($params);
+    $statement =
+        $pdo->prepare($sql);
 
-    return (int) $statement->fetchColumn();
+
+    $statement->execute(
+        $params
+    );
+
+
+    return
+        (int) $statement->fetchColumn();
 }
 
 function getFeedPosts(
@@ -358,8 +494,9 @@ function getFeedPosts(
     ?int $categoryId = null,
     string $sort = 'newest',
     ?int $tagId = null,
-    ?int $authorId = null
+    ?string $authorSlug = null
 ): array {
+
     $sql = "
         SELECT
             p.id,
@@ -376,41 +513,60 @@ function getFeedPosts(
             pr.public_slug,
             pr.profile_picture,
 
-            COALESCE(l.likes_count, 0) AS likes_count,
-            COALESCE(cm.comments_count, 0) AS comments_count
+            COALESCE(
+                l.likes_count,
+                0
+            ) AS likes_count,
+
+            COALESCE(
+                cm.comments_count,
+                0
+            ) AS comments_count
 
         FROM posts p
+
 
         JOIN categories c
             ON c.id = p.category_id
 
+
         JOIN profiles pr
             ON pr.user_id = p.user_id
+
 
         LEFT JOIN (
             SELECT
                 post_id,
                 COUNT(*) AS likes_count
+
             FROM post_likes
+
             GROUP BY post_id
         ) l
             ON l.post_id = p.id
+
 
         LEFT JOIN (
             SELECT
                 post_id,
                 COUNT(*) AS comments_count
+
             FROM comments
+
             WHERE deleted_at IS NULL
+
             GROUP BY post_id
         ) cm
             ON cm.post_id = p.id
+
 
         WHERE p.status = 'published'
           AND p.deleted_at IS NULL
     ";
 
+
     if ($search !== '') {
+
         $sql .= "
             AND (
                 p.title LIKE :search
@@ -419,13 +575,17 @@ function getFeedPosts(
         ";
     }
 
+
     if ($categoryId !== null) {
+
         $sql .= "
             AND p.category_id = :category_id
         ";
     }
 
+
     if ($tagId !== null) {
+
         $sql .= "
             AND EXISTS (
                 SELECT 1
@@ -433,50 +593,49 @@ function getFeedPosts(
                 FROM post_tag pt_filter
 
                 WHERE pt_filter.post_id = p.id
-                AND pt_filter.tag_id = :tag_id
+                  AND pt_filter.tag_id = :tag_id
             )
         ";
     }
 
-    if ($authorId !== null) {
+
+    if ($authorSlug !== null) {
+
         $sql .= "
-            AND p.user_id = :author_id
+            AND pr.public_slug = :author_slug
         ";
     }
 
+
     $orderBy = match ($sort) {
-        'liked' => 'likes_count DESC, p.created_at DESC',
-        'commented' => 'comments_count DESC, p.created_at DESC',
-        default => 'p.created_at DESC'
+
+        'liked' =>
+        'likes_count DESC,
+             p.created_at DESC',
+
+        'commented' =>
+        'comments_count DESC,
+             p.created_at DESC',
+
+        default =>
+        'p.created_at DESC'
     };
 
 
-
     $sql .= "
-    ORDER BY $orderBy
-    LIMIT :limit
-    OFFSET :offset
+        ORDER BY {$orderBy}
+
+        LIMIT :limit
+        OFFSET :offset
     ";
 
-    $statement = $pdo->prepare($sql);
 
-    if ($authorId !== null) {
-        $statement->bindValue(
-            ':author_id',
-            $authorId,
-            PDO::PARAM_INT
-        );
-    }
+    $statement =
+        $pdo->prepare($sql);
 
-    if ($tagId !== null) {
-        $statement->bindValue(
-            ':tag_id',
-            $tagId,
-            PDO::PARAM_INT
-        );
-    }
 
     if ($search !== '') {
+
         $statement->bindValue(
             ':search',
             '%' . $search . '%',
@@ -484,7 +643,9 @@ function getFeedPosts(
         );
     }
 
+
     if ($categoryId !== null) {
+
         $statement->bindValue(
             ':category_id',
             $categoryId,
@@ -492,11 +653,33 @@ function getFeedPosts(
         );
     }
 
+
+    if ($tagId !== null) {
+
+        $statement->bindValue(
+            ':tag_id',
+            $tagId,
+            PDO::PARAM_INT
+        );
+    }
+
+
+    if ($authorSlug !== null) {
+
+        $statement->bindValue(
+            ':author_slug',
+            $authorSlug,
+            PDO::PARAM_STR
+        );
+    }
+
+
     $statement->bindValue(
         ':limit',
         $limit,
         PDO::PARAM_INT
     );
+
 
     $statement->bindValue(
         ':offset',
@@ -504,7 +687,9 @@ function getFeedPosts(
         PDO::PARAM_INT
     );
 
+
     $statement->execute();
+
 
     return $statement->fetchAll(
         PDO::FETCH_ASSOC
@@ -768,7 +953,7 @@ function getOwnedPostByPublicId(
     return $post ?: null;
 }
 
-function updateOwnedPost (
+function updateOwnedPost(
     PDO $pdo,
     int $postId,
     int $userId,
@@ -814,7 +999,7 @@ function replacePostTags(
 
     $statement->execute(['post_id' => $postId]);
 
-    if(trim($tagsInput) !== '') {
+    if (trim($tagsInput) !== '') {
         processPostTags($pdo, $postId, $tagsInput);
     }
 }
@@ -841,7 +1026,8 @@ function softDeleteOwnedPost(
     return $statement->rowCount() > 0;
 }
 
-function getDeletedPosts(PDO $pdo): array {
+function getDeletedPosts(PDO $pdo): array
+{
     $statement = $pdo->prepare(
         "SELECT
             p.id,
@@ -895,7 +1081,8 @@ function restoreDeletedPost(
     return $statement->rowCount() > 0;
 }
 
-function softDeletePostById(PDO $pdo, int $postId): bool {
+function softDeletePostById(PDO $pdo, int $postId): bool
+{
     $statement = $pdo->prepare(
         "UPDATE posts
         

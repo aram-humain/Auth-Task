@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lastName
             );
             $pdo->beginTransaction();
-            createUser($pdo, $firstName, $email, $lastName, $password, $token, $publicSlug);
+            createUser($pdo,$firstName,$lastName,$email,$password,$token,$publicSlug);
             sendVerificationLinkEmail($email, $firstName, $token);
             $pdo->commit();
 
