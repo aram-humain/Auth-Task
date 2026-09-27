@@ -198,6 +198,14 @@
 
                 </a>
 
+                <a
+                    href="/Components/SavedPosts/SavedPosts.php"
+                    class="dashboard-action">
+
+                    Saved Posts
+
+                </a>
+
             </div>
 
             <div class="logout-container">

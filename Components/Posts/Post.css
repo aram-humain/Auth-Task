@@ -338,11 +338,7 @@ body {
 
 }
 
-.post-images
-
-.post-image:only-child
-
-img {
+.post-images .post-image:only-child img {
 
     width: 100%;
 
@@ -1978,6 +1974,71 @@ img {
 
    ========================= */
 
+    .post-status-form {
+        margin: 0;
+    }
+
+
+    .post-archive-button,
+    .post-publish-button {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        min-height: 40px;
+
+        padding:
+            9px 18px;
+
+        border-radius: 8px;
+
+        font-family: inherit;
+
+        font-size: 14px;
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+
+    .post-archive-button {
+        border:
+            1px solid var(--border-color);
+
+        background:
+            var(--bg-color);
+
+        color:
+            var(--text-color);
+    }
+
+
+    .post-archive-button:hover {
+        border-color:
+            var(--primary-color);
+
+        color:
+            var(--primary-color);
+    }
+
+
+    .post-publish-button {
+        border:
+            1px solid var(--success-color);
+
+        background:
+            var(--success-color);
+
+        color:
+            #ffffff;
+    }
+
 .post-owner-actions {
 
     display: flex;
@@ -2132,6 +2193,78 @@ img {
 
         #ffffff;
 
+}
+
+.post-save-area {
+    margin-left: auto;
+}
+
+
+.save-form {
+    margin: 0;
+}
+
+
+.save-button {
+    min-height: 40px;
+
+    padding:
+        8px 15px;
+
+    border:
+        1px solid var(--border-color);
+
+    border-radius: 9px;
+
+    background:
+        var(--card-color);
+
+    color:
+        var(--text-color);
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.save-button:hover {
+    border-color:
+        var(--primary-color);
+
+    color:
+        var(--primary-color);
+}
+
+
+.save-button-active {
+    border-color:
+        var(--primary-color);
+
+    background:
+        var(--primary-color);
+
+    color:
+        #ffffff;
+}
+
+
+.save-button-active:hover {
+    border-color:
+        var(--primary-hover);
+
+    background:
+        var(--primary-hover);
+
+    color:
+        #ffffff;
 }
 
 /* =========================
@@ -2326,6 +2459,8 @@ img {
 
     }
 
+   
+
     .post-owner-label {
 
         text-align: center;
@@ -2350,6 +2485,12 @@ img {
 
         width: 100%;
 
+    }
+
+    .post-status-form,
+    .post-archive-button,
+    .post-publish-button {
+        width: 100%;
     }
 
 }

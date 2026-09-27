@@ -1098,3 +1098,34 @@ function softDeletePostById(PDO $pdo, int $postId): bool
 
     return $statement->rowCount() > 0;
 }
+
+function changeOwnedPostStatus(
+    PDO $pdo, 
+    int $postId,
+    int $userId,
+    string $status
+): bool {
+    if(!isValidPostStatus($status)) {
+        throw new InvalidArgumentException('Invalid post status.');
+    }
+
+    $statement = $pdo->prepare(
+        "UPDATE posts
+        
+        SET
+        status = :status,
+        updated_at = CURRENT_TIMESTAMP
+        
+        WHERE ID = :post_id
+        AND user_id = :user_id
+        AND deleted_at IS NULL"
+    );
+
+    $statement->execute([
+        'status' => $status,
+        'post_id' => $postId,
+        'user_id' => $userId
+    ]);
+
+    return $statement->rowCount() > 0;
+}

@@ -9,6 +9,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Posts/PostsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Comments/CommentsDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/Likes/LikeDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Components/SavedPosts/SavedPostDB.php';
 
 use Ramsey\Uuid\Uuid;
 
@@ -134,5 +135,9 @@ $canReportPost =
     && (int) $post['user_id'] !== $viewerUserId
     && $post['status'] === 'published'
     && $post['deleted_at'] === null;
+
+$canSave = $viewerUserId !== null && $post['deleted_at'] === null && $post['status'] === 'published';
+
+$hasSaved = $canSave && hasUserSavedPost($pdo, (int) $post['id'], $viewerUserId);
 
 require_once __DIR__ . '/Post.html.php';

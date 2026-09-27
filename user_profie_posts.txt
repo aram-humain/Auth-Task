@@ -1043,5 +1043,18 @@ Features:
 | Старые `users.name` места исправлены на Profile | ✅ |
 | Feed performance ≤ ~5 queries | ✅ |
 | `schema.sql` in repository | ✅ |
-| Root `/moderator.php` route как в формулировке задания | | `schema.sql` in repository | ✅ | |
-| Notifications | ❌ extra |
+| Root `/moderator.php` route как в формулировке задания | ⏳ проверить/добавить |
+| Notifications: Like | ✅ extra |
+| Notifications: Comment | ✅ extra |
+| Notifications: Reply | ✅ extra |
+| Notifications unread counter | ✅ extra |
+| Mark one notification as read | ✅ extra |
+| Mark all notifications as read | ✅ extra |
+| Notification ownership protection | ✅ extra |
+| Notification → переход к Post/Comment | ✅ extra |
+| Saved Posts | ✅ extra |
+| Save / Unsave Post | ✅ extra |
+| Saved Posts page | ✅ extra |
+| Saved Posts like/comment counts | ✅ extra |
+| Saved Posts ownership | ✅ extra |
+| Profile Activity / Statistics | ⏳ extra, следующий |
