@@ -38,281 +38,278 @@
 
 <body>
 
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle">
-
-    Theme
-
-</button>
+  
 
 
-<main class="saved-container">
+    <main class="saved-container">
 
 
-    <header class="saved-header">
+        <header class="saved-header">
 
-        <div>
+            <div>
 
-            <h1>
-                Saved Posts
-            </h1>
+                <h1>
+                    Saved Posts
+                </h1>
 
-            <p>
-                Posts you saved for later.
-            </p>
+                <p>
+                    Posts you saved for later.
+                </p>
 
-        </div>
-
-
-        <a
-            href="/posts.php"
-            class="saved-feed-button">
-
-            Browse Posts
-
-        </a>
-
-    </header>
+            </div>
 
 
-    <?php if (empty($savedPosts)): ?>
+            <a
+                href="/posts.php"
+                class="saved-feed-button">
+
+                Browse Posts
+
+            </a>
+
+        </header>
 
 
-        <section class="saved-empty">
-
-            <h2>
-                No saved posts
-            </h2>
-
-            <p>
-                Posts you save will appear here.
-            </p>
-
-        </section>
+        <?php if (empty($savedPosts)): ?>
 
 
-    <?php else: ?>
+            <section class="saved-empty">
+
+                <h2>
+                    No saved posts
+                </h2>
+
+                <p>
+                    Posts you save will appear here.
+                </p>
+
+            </section>
 
 
-        <section class="saved-list">
+        <?php else: ?>
 
 
-            <?php foreach ($savedPosts as $post): ?>
+            <section class="saved-list">
 
 
-                <?php
-
-                $authorName = trim(
-                    ($post['first_name'] ?? '')
-                    . ' '
-                    . ($post['last_name'] ?? '')
-                );
+                <?php foreach ($savedPosts as $post): ?>
 
 
-                if ($authorName === '') {
-                    $authorName = 'User';
-                }
+                    <?php
 
-
-                $preview =
-                    trim(
-                        $post['content']
-                        ?? ''
+                    $authorName = trim(
+                        ($post['first_name'] ?? '')
+                            . ' '
+                            . ($post['last_name'] ?? '')
                     );
 
 
-                if (
-                    mb_strlen($preview)
-                    > 300
-                ) {
+                    if ($authorName === '') {
+                        $authorName = 'User';
+                    }
+
 
                     $preview =
-                        mb_substr(
-                            $preview,
-                            0,
-                            300
-                        )
-                        . '...';
-                }
-
-                ?>
+                        trim(
+                            $post['content']
+                                ?? ''
+                        );
 
 
-                <article class="saved-post-card">
+                    if (
+                        mb_strlen($preview)
+                        > 300
+                    ) {
+
+                        $preview =
+                            mb_substr(
+                                $preview,
+                                0,
+                                300
+                            )
+                            . '...';
+                    }
+
+                    ?>
 
 
-                    <div class="saved-post-meta">
+                    <article class="saved-post-card">
 
 
-                        <a
-                            href="/Components/Profile/Profile.php?slug=<?= urlencode(
-                                $post['public_slug']
-                            ) ?>"
-                            class="saved-author">
-
-                            <?= htmlspecialchars(
-                                $authorName,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-
-                        </a>
+                        <div class="saved-post-meta">
 
 
-                        <span>
-                            ·
-                        </span>
+                            <a
+                                href="/Components/Profile/Profile.php?slug=<?= urlencode(
+                                                                                $post['public_slug']
+                                                                            ) ?>"
+                                class="saved-author">
 
-
-                        <span>
-
-                            <?= htmlspecialchars(
-                                $post['category_name'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-
-                        </span>
-
-
-                        <span>
-                            ·
-                        </span>
-
-
-                        <time>
-
-                            <?= htmlspecialchars(
-                                date(
-                                    'd M Y, H:i',
-                                    strtotime(
-                                        $post['created_at']
-                                    )
-                                ),
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-
-                        </time>
-
-
-                    </div>
-
-
-                    <h2>
-
-                        <a
-                            href="/Components/Posts/Post.php?id=<?= urlencode(
-                                $post['uuid']
-                            ) ?>">
-
-                            <?= htmlspecialchars(
-                                $post['title'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-
-                        </a>
-
-                    </h2>
-
-
-                    <?php if ($preview !== ''): ?>
-
-                        <p class="saved-preview">
-
-                            <?= nl2br(
-                                htmlspecialchars(
-                                    $preview,
+                                <?= htmlspecialchars(
+                                    $authorName,
                                     ENT_QUOTES,
                                     'UTF-8'
-                                )
-                            ) ?>
+                                ) ?>
 
-                        </p>
+                            </a>
 
-                    <?php endif; ?>
-
-
-                    <div class="saved-post-footer">
-
-
-                        <div class="saved-stats">
 
                             <span>
-                                Likes:
-                                <?= (int) $post['likes_count'] ?>
+                                ·
                             </span>
 
+
                             <span>
-                                Comments:
-                                <?= (int) $post['comments_count'] ?>
+
+                                <?= htmlspecialchars(
+                                    $post['category_name'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
                             </span>
+
+
+                            <span>
+                                ·
+                            </span>
+
+
+                            <time>
+
+                                <?= htmlspecialchars(
+                                    date(
+                                        'd M Y, H:i',
+                                        strtotime(
+                                            $post['created_at']
+                                        )
+                                    ),
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </time>
+
 
                         </div>
 
 
-                        <div class="saved-date">
+                        <h2>
 
-                            Saved:
+                            <a
+                                href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                                        $post['uuid']
+                                                                    ) ?>">
 
-                            <?= htmlspecialchars(
-                                date(
-                                    'd M Y, H:i',
-                                    strtotime(
-                                        $post['saved_at']
+                                <?= htmlspecialchars(
+                                    $post['title'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </a>
+
+                        </h2>
+
+
+                        <?php if ($preview !== ''): ?>
+
+                            <p class="saved-preview">
+
+                                <?= nl2br(
+                                    htmlspecialchars(
+                                        $preview,
+                                        ENT_QUOTES,
+                                        'UTF-8'
                                     )
-                                ),
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+                                ) ?>
+
+                            </p>
+
+                        <?php endif; ?>
+
+
+                        <div class="saved-post-footer">
+
+
+                            <div class="saved-stats">
+
+                                <span>
+                                    Likes:
+                                    <?= (int) $post['likes_count'] ?>
+                                </span>
+
+                                <span>
+                                    Comments:
+                                    <?= (int) $post['comments_count'] ?>
+                                </span>
+
+                            </div>
+
+
+                            <div class="saved-date">
+
+                                Saved:
+
+                                <?= htmlspecialchars(
+                                    date(
+                                        'd M Y, H:i',
+                                        strtotime(
+                                            $post['saved_at']
+                                        )
+                                    ),
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </div>
+
+
+                            <a
+                                href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                                        $post['uuid']
+                                                                    ) ?>"
+                                class="open-post-button">
+
+                                Open Post
+
+                            </a>
+
 
                         </div>
 
 
-                        <a
-                            href="/Components/Posts/Post.php?id=<?= urlencode(
-                                $post['uuid']
-                            ) ?>"
-                            class="open-post-button">
-
-                            Open Post
-
-                        </a>
+                    </article>
 
 
-                    </div>
+                <?php endforeach; ?>
 
 
-                </article>
+            </section>
 
 
-            <?php endforeach; ?>
+        <?php endif; ?>
 
 
-        </section>
+        <footer class="saved-footer">
+
+            <a
+                href="/Components/Dashboard/Dashboard.php"
+                class="back-dashboard">
+
+                Back to Dashboard
+
+            </a>
+
+        </footer>
 
 
-    <?php endif; ?>
-
-
-    <footer class="saved-footer">
-
-        <a
-            href="/Components/Dashboard/Dashboard.php"
-            class="back-dashboard">
-
-            Back to Dashboard
-
-        </a>
-
-    </footer>
-
-
-</main>
+    </main>
 
 
 </body>

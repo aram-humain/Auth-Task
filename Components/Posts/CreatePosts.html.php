@@ -38,12 +38,11 @@
 
 <body>
 
-    <button
-        type="button"
-        id="theme-toggle"
-        class="theme-toggle">
-        Theme
-    </button>
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
+
 
 
     <main class="create-post-container">
@@ -88,10 +87,10 @@
                     type="hidden"
                     name="csrf_token"
                     value="<?= htmlspecialchars(
-                        $csrfToken,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>">
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
 
 
                 <div class="form-section">
@@ -113,10 +112,10 @@
                             required
                             placeholder="Enter post title"
                             value="<?= htmlspecialchars(
-                                $title,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>">
+                                        $title,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>">
 
                     </div>
 
@@ -132,10 +131,10 @@
                             name="content"
                             rows="10"
                             placeholder="Write your post..."><?= htmlspecialchars(
-                                $content,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?></textarea>
+                                                                    $content,
+                                                                    ENT_QUOTES,
+                                                                    'UTF-8'
+                                                                ) ?></textarea>
 
                         <small>
                             A post must contain text,
@@ -240,10 +239,10 @@
                             maxlength="500"
                             placeholder="anime, movie, art"
                             value="<?= htmlspecialchars(
-                                $tagsInput,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>">
+                                        $tagsInput,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>">
 
                         <small>
                             Separate tags with commas.

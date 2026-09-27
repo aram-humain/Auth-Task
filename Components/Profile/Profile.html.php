@@ -48,12 +48,12 @@ if ($fullName === '') {
 
 <body>
 
-    <button
-        type="button"
-        id="theme-toggle"
-        class="theme-toggle">
-        Theme
-    </button>
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
+
+ 
 
     <main class="profile-container">
 

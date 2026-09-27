@@ -33,12 +33,12 @@
 
 <body>
 
-    <button
-        type="button"
-        id="theme-toggle"
-        class="theme-toggle">
-        Theme
-    </button>
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
+
+ 
 
     <main class="edit-profile-container">
 
@@ -86,10 +86,10 @@
                     type="hidden"
                     name="csrf_token"
                     value="<?= htmlspecialchars(
-                        $csrfToken,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>">
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
 
 
                 <div class="profile-picture-section">
@@ -103,10 +103,10 @@
 
                             <img
                                 src="<?= htmlspecialchars(
-                                    $profileInfo['profile_picture'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
+                                            $profileInfo['profile_picture'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
                                 alt="Current profile picture"
                                 class="profile-picture-preview">
 
@@ -178,10 +178,10 @@
                                 id="first_name"
                                 name="first_name"
                                 value="<?= htmlspecialchars(
-                                    $profileInfo['first_name'] ?? '',
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>">
+                                            $profileInfo['first_name'] ?? '',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
 
                         </div>
 
@@ -197,10 +197,10 @@
                                 id="last_name"
                                 name="last_name"
                                 value="<?= htmlspecialchars(
-                                    $profileInfo['last_name'] ?? '',
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>">
+                                            $profileInfo['last_name'] ?? '',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
 
                         </div>
 
@@ -216,10 +216,10 @@
                                 id="phone"
                                 name="phone"
                                 value="<?= htmlspecialchars(
-                                    $profileInfo['phone'] ?? '',
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>">
+                                            $profileInfo['phone'] ?? '',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
 
                         </div>
 
@@ -235,10 +235,10 @@
                                 id="location"
                                 name="location"
                                 value="<?= htmlspecialchars(
-                                    $profileInfo['location'] ?? '',
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>">
+                                            $profileInfo['location'] ?? '',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
 
                         </div>
 
@@ -254,10 +254,10 @@
                                 id="date_of_birth"
                                 name="date_of_birth"
                                 value="<?= htmlspecialchars(
-                                    $profileInfo['date_of_birth'] ?? '',
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>">
+                                            $profileInfo['date_of_birth'] ?? '',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
 
                         </div>
 
@@ -274,10 +274,10 @@
                             id="bio"
                             name="bio"
                             rows="6"><?= htmlspecialchars(
-                                $profileInfo['bio'] ?? '',
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?></textarea>
+                                            $profileInfo['bio'] ?? '',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?></textarea>
 
                     </div>
 
@@ -288,8 +288,8 @@
 
                     <a
                         href="/Components/Profile/Profile.php?slug=<?= urlencode(
-                            $profileInfo['public_slug']
-                        ) ?>"
+                                                                        $profileInfo['public_slug']
+                                                                    ) ?>"
                         class="profile-button profile-button-secondary">
                         Cancel
                     </a>

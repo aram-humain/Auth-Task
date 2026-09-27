@@ -34,13 +34,11 @@ http_response_code(403);
 
 <body>
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle"
->
-    Theme
-</button>
+<?php
+require $_SERVER['DOCUMENT_ROOT']
+    . '/includes/app_header.php';
+?>
+
 
 <main class="error-container">
 

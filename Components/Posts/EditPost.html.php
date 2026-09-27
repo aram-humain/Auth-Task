@@ -43,315 +43,312 @@
 
 <body>
 
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle">
-
-    Theme
-
-</button>
+ 
 
 
-<main class="edit-post-page">
+    <main class="edit-post-page">
 
-    <section class="edit-post-card">
-
-
-        <header class="edit-post-header">
-
-            <div>
-
-                <h1>
-                    Edit Post
-                </h1>
-
-                <p>
-                    Update your post information and publication status.
-                </p>
-
-            </div>
-
-            <a
-                href="/Components/Posts/Post.php?id=<?= urlencode(
-                    $uuid
-                ) ?>"
-                class="view-post-button">
-
-                View Post
-
-            </a>
-
-        </header>
+        <section class="edit-post-card">
 
 
-        <?php if ($error !== null): ?>
+            <header class="edit-post-header">
 
-            <div class="edit-post-error">
+                <div>
 
-                <?= htmlspecialchars(
-                    $error,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
+                    <h1>
+                        Edit Post
+                    </h1>
 
-            </div>
+                    <p>
+                        Update your post information and publication status.
+                    </p>
 
-        <?php endif; ?>
+                </div>
 
+                <a
+                    href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                            $uuid
+                                                        ) ?>"
+                    class="view-post-button">
 
-        <form
-            method="POST"
-            action="/Components/Posts/EditPost.php?id=<?= urlencode(
-                $uuid
-            ) ?>"
-            class="edit-post-form">
+                    View Post
 
+                </a>
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="<?= htmlspecialchars(
-                    $csrfToken,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>">
+            </header>
 
 
-            <!-- TITLE -->
+            <?php if ($error !== null): ?>
 
-            <div class="form-group">
+                <div class="edit-post-error">
 
-                <label for="title">
-
-                    Title
-
-                </label>
-
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    maxlength="255"
-                    required
-                    value="<?= htmlspecialchars(
-                        $title,
+                    <?= htmlspecialchars(
+                        $error,
                         ENT_QUOTES,
                         'UTF-8'
-                    ) ?>">
+                    ) ?>
 
-            </div>
+                </div>
+
+            <?php endif; ?>
 
 
-            <!-- CATEGORY -->
+            <form
+                method="POST"
+                action="/Components/Posts/EditPost.php?id=<?= urlencode(
+                                                                $uuid
+                                                            ) ?>"
+                class="edit-post-form">
 
-            <div class="form-group">
 
-                <label for="category_id">
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
 
-                    Category
 
-                </label>
+                <!-- TITLE -->
 
-                <select
-                    id="category_id"
-                    name="category_id"
-                    required>
+                <div class="form-group">
 
-                    <?php foreach ($categories as $category): ?>
+                    <label for="title">
 
-                        <option
-                            value="<?= (int) $category['id'] ?>"
-                            <?= $categoryId ===
-                                (int) $category['id']
+                        Title
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        maxlength="255"
+                        required
+                        value="<?= htmlspecialchars(
+                                    $title,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>">
+
+                </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="form-group">
+
+                    <label for="category_id">
+
+                        Category
+
+                    </label>
+
+                    <select
+                        id="category_id"
+                        name="category_id"
+                        required>
+
+                        <?php foreach ($categories as $category): ?>
+
+                            <option
+                                value="<?= (int) $category['id'] ?>"
+                                <?= $categoryId ===
+                                    (int) $category['id']
                                     ? 'selected'
                                     : '' ?>>
 
-                            <?= htmlspecialchars(
-                                $category['name'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
+                                <?= htmlspecialchars(
+                                    $category['name'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </option>
+
+                        <?php endforeach; ?>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TAGS -->
+
+                <div class="form-group">
+
+                    <label for="tags">
+
+                        Tags
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="tags"
+                        name="tags"
+                        maxlength="500"
+                        placeholder="php, mysql, security"
+                        value="<?= htmlspecialchars(
+                                    $tagsInput,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>">
+
+                    <small class="form-help">
+
+                        Separate tags with commas.
+
+                    </small>
+
+                </div>
+
+
+                <!-- CONTENT -->
+
+                <div class="form-group">
+
+                    <label for="content">
+
+                        Content
+
+                    </label>
+
+                    <textarea
+                        id="content"
+                        name="content"
+                        rows="12"
+                        placeholder="Write your post..."><?= htmlspecialchars(
+                                                                $content,
+                                                                ENT_QUOTES,
+                                                                'UTF-8'
+                                                            ) ?></textarea>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="form-group">
+
+                    <label for="status">
+
+                        Status
+
+                    </label>
+
+                    <select
+                        id="status"
+                        name="status"
+                        required>
+
+                        <option
+                            value="draft"
+                            <?= $status === 'draft'
+                                ? 'selected'
+                                : '' ?>>
+
+                            Draft
 
                         </option>
 
-                    <?php endforeach; ?>
+                        <option
+                            value="published"
+                            <?= $status === 'published'
+                                ? 'selected'
+                                : '' ?>>
 
-                </select>
+                            Published
 
-            </div>
+                        </option>
 
+                        <option
+                            value="archived"
+                            <?= $status === 'archived'
+                                ? 'selected'
+                                : '' ?>>
 
-            <!-- TAGS -->
+                            Archived
 
-            <div class="form-group">
+                        </option>
 
-                <label for="tags">
-
-                    Tags
-
-                </label>
-
-                <input
-                    type="text"
-                    id="tags"
-                    name="tags"
-                    maxlength="500"
-                    placeholder="php, mysql, security"
-                    value="<?= htmlspecialchars(
-                        $tagsInput,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>">
-
-                <small class="form-help">
-
-                    Separate tags with commas.
-
-                </small>
-
-            </div>
+                    </select>
 
 
-            <!-- CONTENT -->
+                    <div class="status-help">
 
-            <div class="form-group">
+                        <div>
 
-                <label for="content">
+                            <strong>Draft</strong>
 
-                    Content
+                            <span>
+                                Visible only to you and Admin.
+                            </span>
 
-                </label>
+                        </div>
 
-                <textarea
-                    id="content"
-                    name="content"
-                    rows="12"
-                    placeholder="Write your post..."><?= htmlspecialchars(
-                        $content,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?></textarea>
+                        <div>
 
-            </div>
+                            <strong>Published</strong>
 
+                            <span>
+                                Visible in the feed and on your profile.
+                            </span>
 
-            <!-- STATUS -->
+                        </div>
 
-            <div class="form-group">
+                        <div>
 
-                <label for="status">
+                            <strong>Archived</strong>
 
-                    Status
+                            <span>
+                                Hidden from the feed but still visible to you.
+                            </span>
 
-                </label>
-
-                <select
-                    id="status"
-                    name="status"
-                    required>
-
-                    <option
-                        value="draft"
-                        <?= $status === 'draft'
-                            ? 'selected'
-                            : '' ?>>
-
-                        Draft
-
-                    </option>
-
-                    <option
-                        value="published"
-                        <?= $status === 'published'
-                            ? 'selected'
-                            : '' ?>>
-
-                        Published
-
-                    </option>
-
-                    <option
-                        value="archived"
-                        <?= $status === 'archived'
-                            ? 'selected'
-                            : '' ?>>
-
-                        Archived
-
-                    </option>
-
-                </select>
-
-
-                <div class="status-help">
-
-                    <div>
-
-                        <strong>Draft</strong>
-
-                        <span>
-                            Visible only to you and Admin.
-                        </span>
-
-                    </div>
-
-                    <div>
-
-                        <strong>Published</strong>
-
-                        <span>
-                            Visible in the feed and on your profile.
-                        </span>
-
-                    </div>
-
-                    <div>
-
-                        <strong>Archived</strong>
-
-                        <span>
-                            Hidden from the feed but still visible to you.
-                        </span>
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
+
+                <!-- ACTIONS -->
+
+                <div class="edit-post-actions">
+
+                    <a
+                        href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                                $uuid
+                                                            ) ?>"
+                        class="cancel-button">
+
+                        Cancel
+
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="save-button">
+
+                        Save Changes
+
+                    </button>
+
+                </div>
 
 
-            <!-- ACTIONS -->
+            </form>
 
-            <div class="edit-post-actions">
+        </section>
 
-                <a
-                    href="/Components/Posts/Post.php?id=<?= urlencode(
-                        $uuid
-                    ) ?>"
-                    class="cancel-button">
-
-                    Cancel
-
-                </a>
-
-                <button
-                    type="submit"
-                    class="save-button">
-
-                    Save Changes
-
-                </button>
-
-            </div>
-
-
-        </form>
-
-    </section>
-
-</main>
+    </main>
 
 
 </body>

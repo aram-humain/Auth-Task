@@ -47,15 +47,12 @@
 
 <body>
 
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
 
-    <button
-        type="button"
-        id="theme-toggle"
-        class="theme-toggle">
 
-        Theme
-
-    </button>
 
 
     <main class="moderator-page">
@@ -684,8 +681,8 @@
                                             href="/Components/Posts/Post.php?id=<?= urlencode(
                                                                                     $report['post_uuid']
                                                                                 ) ?>#comment-<?= urlencode(
-                                                            $report['comment_uuid']
-                                                        ) ?>"
+                                                                                                    $report['comment_uuid']
+                                                                                                ) ?>"
                                             class="view-button">
 
                                             View Comment

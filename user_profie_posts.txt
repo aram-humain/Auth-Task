@@ -990,6 +990,11 @@ Features:
 | Author name → Profile | ✅ |
 | Edit own Post | ✅ |
 | Change draft/published/archived | ✅ |
+| Direct `Archive Post` с Post page | ✅ |
+| Direct `Publish Post` для archived/draft | ✅ |
+| Backend validation status transition | ✅ |
+| Archived Post исчезает из Feed | ✅ |
+| Owner может открыть Archived Post | ✅ |
 | Delete own Post | ✅ |
 | Soft Delete Post | ✅ |
 | Deleted posts скрыты из feed/profile/public page | ✅ |
@@ -1042,19 +1047,43 @@ Features:
 | Admin Activity Log pagination | ✅ |
 | Старые `users.name` места исправлены на Profile | ✅ |
 | Feed performance ≤ ~5 queries | ✅ |
-| `schema.sql` in repository | ✅ |
+| `schema.sql` in repository | ✅, но после финальных изменений надо обновить |
 | Root `/moderator.php` route как в формулировке задания | ⏳ проверить/добавить |
 | Notifications: Like | ✅ extra |
 | Notifications: Comment | ✅ extra |
 | Notifications: Reply | ✅ extra |
+| Notifications page | ✅ extra |
 | Notifications unread counter | ✅ extra |
 | Mark one notification as read | ✅ extra |
 | Mark all notifications as read | ✅ extra |
 | Notification ownership protection | ✅ extra |
-| Notification → переход к Post/Comment | ✅ extra |
+| Notification → Post / exact Comment | ✅ extra |
 | Saved Posts | ✅ extra |
 | Save / Unsave Post | ✅ extra |
 | Saved Posts page | ✅ extra |
 | Saved Posts like/comment counts | ✅ extra |
 | Saved Posts ownership | ✅ extra |
-| Profile Activity / Statistics | ⏳ extra, следующий |
+| **Global Navbar / Header** | ⏳ |
+| Все доступные User pages в Navbar | ⏳ |
+| Все доступные Moderator pages в Navbar | ⏳ |
+| Все доступные Admin pages в Navbar | ⏳ |
+| Navbar показывает страницы через permissions | ⏳ |
+| Notifications bell справа сверху на всех logged-in страницах | ⏳ |
+| Unread badge на bell | ⏳ |
+| Avatar-круг справа сверху | ⏳ |
+| Avatar → собственный Profile | ⏳ |
+| Logout на всех logged-in страницах | ⏳ |
+| Settings page | ⏳ |
+| Settings → Change Email | ⏳ |
+| Проверка, что новый email свободен | ⏳ |
+| Подтверждение смены email текущим password | ⏳ |
+| После смены email password/user_id/profile/posts сохраняются | ⏳ |
+| Новый email становится unverified | ⏳ |
+| Verification link отправляется на новый email | ⏳ |
+| Новый email нужно подтвердить перед нормальной работой | ⏳ |
+| Profile Activity / Statistics | ⏳ extra |
+| Удаление старого Follow system | ✅ |
+| Удаление старого Connections system | ✅ |
+| Финальная очистка неиспользуемого SQL/code | ⏳ |
+| Финальная генерация `schema.sql` | ⏳ |
+| Финальный security/authorization audit | ⏳ |

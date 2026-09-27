@@ -14,20 +14,17 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Login</title>
 
     <link
         rel="stylesheet"
-        href="./Login.css"
-    >
+        href="./Login.css">
 
     <link
         rel="stylesheet"
-        href="/assets/css/theme.css"
-    >
+        href="/assets/css/theme.css">
 
     <script src="/assets/js/theme.js"></script>
 
@@ -35,124 +32,120 @@
 
 <body>
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle"
->
-    Theme
-</button>
 
-<main class="login-container">
+    <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle">
+        Theme
+    </button>
 
-    <section class="login-card">
+    <main class="login-container">
 
-        <div class="login-header">
+        <section class="login-card">
 
-            <h1>
-                Welcome Back
-            </h1>
+            <div class="login-header">
 
-            <p>
-                Login to your account
+                <h1>
+                    Welcome Back
+                </h1>
+
+                <p>
+                    Login to your account
+                </p>
+
+            </div>
+
+            <?php if (!empty($errors)): ?>
+
+                <div
+                    class="error-box"
+                    role="alert">
+
+                    <?php foreach ($errors as $error): ?>
+
+                        <p>
+                            <?= htmlspecialchars(
+                                $error,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                        </p>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php endif; ?>
+
+            <form method="POST" action="">
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        value="<?= htmlspecialchars(
+                                    $email,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                        autocomplete="email"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="login-button">
+                    Login
+                </button>
+
+            </form>
+
+            <p class="register-link">
+
+                Don't have an account?
+
+                <a href="../Registration/Registration.php">
+                    Register
+                </a>
+
             </p>
 
-        </div>
+            <p class="forgot-link">
 
-        <?php if (!empty($errors)): ?>
+                <a href="../PasswordReset/Forgot.php">
+                    Forgot Password?
+                </a>
 
-            <div
-                class="error-box"
-                role="alert"
-            >
+            </p>
 
-                <?php foreach ($errors as $error): ?>
+        </section>
 
-                    <p>
-                        <?= htmlspecialchars(
-                            $error,
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
-
-                <?php endforeach; ?>
-
-            </div>
-
-        <?php endif; ?>
-
-        <form method="POST" action="">
-
-            <div class="form-group">
-
-                <label for="email">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value="<?= htmlspecialchars(
-                        $email,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>"
-                    autocomplete="email"
-                    required
-                >
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
-
-            </div>
-
-            <button
-                type="submit"
-                class="login-button"
-            >
-                Login
-            </button>
-
-        </form>
-
-        <p class="register-link">
-
-            Don't have an account?
-
-            <a href="../Registration/Registration.php">
-                Register
-            </a>
-
-        </p>
-
-        <p class="forgot-link">
-
-            <a href="../PasswordReset/Forgot.php">
-                Forgot Password?
-            </a>
-
-        </p>
-
-    </section>
-
-</main>
+    </main>
 
 </body>
 

@@ -37,114 +37,109 @@
 
 <body>
 
-
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle">
-
-    Theme
-
-</button>
+    <?php
+    require $_SERVER['DOCUMENT_ROOT']
+        . '/includes/app_header.php';
+    ?>
 
 
-<main class="edit-comment-page">
+    <main class="edit-comment-page">
 
-    <section class="edit-comment-card">
-
-
-        <header class="edit-comment-header">
-
-            <h1>
-                Edit Comment
-            </h1>
-
-            <p>
-                Update your comment.
-            </p>
-
-        </header>
+        <section class="edit-comment-card">
 
 
-        <?php if ($error !== null): ?>
+            <header class="edit-comment-header">
 
-            <div class="edit-comment-error">
+                <h1>
+                    Edit Comment
+                </h1>
 
-                <?= htmlspecialchars(
-                    $error,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
+                <p>
+                    Update your comment.
+                </p>
 
-            </div>
-
-        <?php endif; ?>
+            </header>
 
 
-        <form
-            method="POST"
-            class="edit-comment-form">
+            <?php if ($error !== null): ?>
+
+                <div class="edit-comment-error">
+
+                    <?= htmlspecialchars(
+                        $error,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>
+
+                </div>
+
+            <?php endif; ?>
 
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="<?= htmlspecialchars(
-                    $csrfToken,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>">
+            <form
+                method="POST"
+                class="edit-comment-form">
 
 
-            <label for="content">
-
-                Comment
-
-            </label>
-
-
-            <textarea
-                id="content"
-                name="content"
-                rows="8"
-                maxlength="2000"
-                required><?= htmlspecialchars(
-                    $content,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?></textarea>
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
 
 
-            <div class="edit-comment-actions">
+                <label for="content">
 
-                <a
-                    href="/Components/Posts/Post.php?id=<?= urlencode(
-                        $postUuid
-                    ) ?>"
-                    class="cancel-button">
+                    Comment
 
-                    Cancel
-
-                </a>
+                </label>
 
 
-                <button
-                    type="submit"
-                    class="save-button">
-
-                    Save Changes
-
-                </button>
-
-            </div>
-
-
-        </form>
+                <textarea
+                    id="content"
+                    name="content"
+                    rows="8"
+                    maxlength="2000"
+                    required><?= htmlspecialchars(
+                                    $content,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?></textarea>
 
 
-    </section>
+                <div class="edit-comment-actions">
 
-</main>
+                    <a
+                        href="/Components/Posts/Post.php?id=<?= urlencode(
+                                                                $postUuid
+                                                            ) ?>"
+                        class="cancel-button">
+
+                        Cancel
+
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="save-button">
+
+                        Save Changes
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </section>
+
+    </main>
 
 
 </body>
