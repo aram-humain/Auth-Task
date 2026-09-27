@@ -100,18 +100,10 @@ try {
 
     exit;
 } catch (Throwable $exception) {
-
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
-    echo '<pre>';
-    echo htmlspecialchars(
-        $exception->getMessage(),
-        ENT_QUOTES,
-        'UTF-8'
-    );
-    echo '</pre>';
-
-    exit;
+    http_response_code(500);
+    exit('Unable to update like');
 }
