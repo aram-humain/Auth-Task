@@ -2,6 +2,8 @@
 
 /** @var array $errors */
 /** @var string $email */
+/** @var string $csrfToken */
+
 
 ?>
 
@@ -79,6 +81,15 @@
             <?php endif; ?>
 
             <form method="POST" action="">
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
 
                 <div class="form-group">
 

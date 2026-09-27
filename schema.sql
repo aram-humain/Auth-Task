@@ -1,13 +1,13 @@
 -- MySQL dump 10.13  Distrib 8.0.46, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: auth_task
+-- Host: localhost    Database: auth_task
 -- ------------------------------------------------------
 -- Server version	8.0.46
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -35,30 +35,7 @@ CREATE TABLE `activity_log` (
   KEY `idx_activity_log_action` (`action`),
   KEY `idx_activity_log_created_at` (`created_at`),
   CONSTRAINT `fk_activity_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `audit_logs`
---
-
-DROP TABLE IF EXISTS `audit_logs`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `audit_logs` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `actor_user_id` int unsigned NOT NULL,
-  `target_user_id` int unsigned DEFAULT NULL,
-  `action` varchar(100) NOT NULL,
-  `old_value` varchar(255) DEFAULT NULL,
-  `new_value` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `fk_audit_actor` (`actor_user_id`),
-  KEY `fk_audit_target` (`target_user_id`),
-  CONSTRAINT `fk_audit_actor` FOREIGN KEY (`actor_user_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `fk_audit_target` FOREIGN KEY (`target_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,35 +111,7 @@ CREATE TABLE `comments` (
   CONSTRAINT `fk_comments_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_comments_content_not_empty` CHECK ((char_length(trim(`content`)) > 0))
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `connections`
---
-
-DROP TABLE IF EXISTS `connections`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `connections` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_low_id` int unsigned NOT NULL,
-  `user_high_id` int unsigned NOT NULL,
-  `requested_By` int unsigned NOT NULL,
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_connections_user_pair` (`user_low_id`,`user_high_id`),
-  KEY `idx_connections_low_status` (`user_low_id`,`status`),
-  KEY `idx_connections_high_status` (`user_high_id`,`status`),
-  KEY `fk_connections_requester` (`requested_By`),
-  CONSTRAINT `fk_connections_high_user` FOREIGN KEY (`user_high_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_connections_low_user` FOREIGN KEY (`user_low_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_connections_requester` FOREIGN KEY (`requested_By`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `chk_connections_different_users` CHECK ((`user_low_id` < `user_high_id`)),
-  CONSTRAINT `chk_connections_status` CHECK ((`status` in (_utf8mb4'pending',_utf8mb4'accepted',_utf8mb4'rejected')))
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -185,23 +134,33 @@ CREATE TABLE `email_verifications` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `follows`
+-- Table structure for table `notifications`
 --
 
-DROP TABLE IF EXISTS `follows`;
+DROP TABLE IF EXISTS `notifications`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `follows` (
-  `follower_user_id` int unsigned NOT NULL,
-  `followed_user_id` int unsigned NOT NULL,
+CREATE TABLE `notifications` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `actor_user_id` int unsigned DEFAULT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `post_id` bigint unsigned DEFAULT NULL,
+  `comment_id` bigint unsigned DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`follower_user_id`,`followed_user_id`),
-  KEY `fk_follows_followed` (`followed_user_id`,`created_at`),
-  KEY `fk_follows_follower` (`follower_user_id`,`created_at`),
-  CONSTRAINT `fk_follows_followed` FOREIGN KEY (`followed_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_follows_follower` FOREIGN KEY (`follower_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `chk_follows_different_users` CHECK ((`follower_user_id` <> `followed_user_id`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`id`),
+  KEY `idx_notifications_user_created` (`user_id`,`created_at`),
+  KEY `idx_notifications_user_unread` (`user_id`,`is_read`,`created_at`),
+  KEY `idx_notifications_actor` (`actor_user_id`),
+  KEY `idx_notifications_post` (`post_id`),
+  KEY `idx_notifications_comment` (`comment_id`),
+  CONSTRAINT `fk_notifications_actor` FOREIGN KEY (`actor_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_notifications_comment` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_notifications_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_notifications_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chk_notifications_type` CHECK ((`type` in (_utf8mb4'post_like',_utf8mb4'post_comment',_utf8mb4'comment_reply')))
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -402,7 +361,7 @@ CREATE TABLE `rate_limit_attempts` (
   KEY `idx_rate_ip` (`action`,`ip_address`,`created_at`),
   KEY `fk_rate_limit_user` (`user_id`),
   CONSTRAINT `fk_rate_limit_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -505,6 +464,14 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping events for database 'auth_task'
+--
+
+--
+-- Dumping routines for database 'auth_task'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -515,4 +482,13 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-25 22:11:30
+-- Dump completed on 2026-09-27 16:13:42
+
+
+-- ==============================
+-- SYSTEM SEED DATA
+-- ==============================
+
+INSERT INTO `roles` VALUES (1,'user','2026-09-07 08:36:00'),(2,'moderator','2026-09-07 08:36:00'),(3,'admin','2026-09-07 08:36:00');
+INSERT INTO `permissions` VALUES (1,'view_dashboard','2026-09-07 08:36:18'),(2,'view_users','2026-09-07 08:36:18'),(3,'manage_users','2026-09-07 08:36:18'),(4,'access_moderator_page','2026-09-07 08:36:18'),(5,'access_admin_page','2026-09-07 08:36:18'),(6,'create_post','2026-09-22 14:00:52'),(7,'moderate_posts','2026-09-22 14:00:52'),(8,'moderate_comments','2026-09-22 14:00:52'),(9,'view_deleted_posts','2026-09-22 14:00:52');
+INSERT INTO `role_permissions` VALUES (1,1),(2,1),(3,1),(2,2),(3,2),(3,3),(2,4),(3,4),(3,5),(1,6),(2,6),(3,6),(2,7),(3,7),(2,8),(3,8),(3,9);

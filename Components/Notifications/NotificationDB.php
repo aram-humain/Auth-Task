@@ -21,6 +21,46 @@ function createNotification(
         'comment_reply'
     ];
 
+    if ($type === 'post_like' && $postId !== null) {
+        $existingStatement = $pdo->prepare(
+            'SELECT id
+            FROM notifications
+            
+            WHERE user_id = :user_id
+            AND actor_user_id = :actor_user_id
+            AND type = :type
+            AND post_id = :post_id
+            
+            LIMIT 1'
+        );
+
+        $existingStatement->execute([
+            'user_id' => $recipientUserId,
+            'actor_user_id' => $actorUserId,
+            'type' => 'post_like',
+            'post_id' => $postId
+        ]);
+
+        $existingNotificationId = $existingStatement->fetchColumn();
+
+        if($existingNotificationId !== false) {
+            $updateStatement = $pdo->prepare(
+                'UPDATE notifications
+                SET
+                is_read = 0,
+                created_at = CURRENT_TIMESTAMP
+                
+                WHERE id = :id'
+            );
+
+            $updateStatement->execute([
+                'id' => (int) $existingNotificationId
+            ]);
+
+            return;
+        }
+    }
+
 
     if (!in_array(
         $type,

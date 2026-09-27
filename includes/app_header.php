@@ -1,33 +1,84 @@
 <?php
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/config/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/auth.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/authorization.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/csrf.php';
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/includes/auth.php';
+$navLoggedIn =
+    isLoggedIn();
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/includes/navigation.php';
+$headerCsrfToken =
+    $navLoggedIn
+    ? csrfToken()
+    : '';
+
+$navUser =
+    null;
 
 
-$navLoggedIn = isLoggedIn();
-
-$navContext = null;
+$unreadNotifications =
+    0;
 
 
 if ($navLoggedIn) {
 
-    $navContext =
-        getNavigationContext(
-            $pdo,
-            (int) currentUserId()
-        );
-}
+    $statement = $pdo->prepare(
+        "SELECT
+            u.id,
+            u.email,
 
+            p.first_name,
+            p.last_name,
+            p.public_slug,
+            p.profile_picture,
+
+            COALESCE(
+                (
+                    SELECT COUNT(*)
+
+                    FROM notifications n
+
+                    WHERE n.user_id = u.id
+                      AND n.is_read = 0
+                ),
+                0
+            ) AS unread_notifications
+
+        FROM users u
+
+        LEFT JOIN profiles p
+            ON p.user_id = u.id
+
+        WHERE u.id = :user_id
+
+        LIMIT 1"
+    );
+
+
+    $statement->execute([
+        'user_id' =>
+        (int) currentUserId()
+    ]);
+
+
+    $navUser =
+        $statement->fetch(
+            PDO::FETCH_ASSOC
+        );
+
+
+    if ($navUser) {
+
+        $unreadNotifications =
+            (int) $navUser['unread_notifications'];
+    }
+}
 
 $currentPath =
     parse_url(
-        $_SERVER['REQUEST_URI'] ?? '/',
+        $_SERVER['REQUEST_URI']
+            ?? '/',
         PHP_URL_PATH
     ) ?: '/';
 
@@ -43,85 +94,111 @@ $isActive =
     };
 
 
-$canCreatePost =
-    $navContext !== null
-    && navigationHasPermission(
-        $navContext,
-        'create_post'
-    );
+$isSectionActive =
+    static function (
+        string $prefix
+    ) use ($currentPath): string {
+
+        return str_starts_with(
+            $currentPath,
+            $prefix
+        )
+            ? ' app-nav-active'
+            : '';
+    };
 
 
-$canModerate =
-    $navContext !== null
-    && navigationHasPermission(
-        $navContext,
-        'access_moderator_page'
-    );
-
-
-$canAccessAdmin =
-    $navContext !== null
-    && navigationHasPermission(
-        $navContext,
-        'access_admin_page'
-    );
-
-
-$canViewUsers =
-    $navContext !== null
-    && navigationHasPermission(
-        $navContext,
-        'view_users'
-    );
-
-
-$canViewDeletedPosts =
-    $navContext !== null
-    && navigationHasPermission(
-        $navContext,
-        'view_deleted_posts'
-    );
 
 
 $isAdmin =
-    $navContext !== null
-    && navigationHasRole(
-        $navContext,
+    $navLoggedIn
+    && hasRole(
+        $pdo,
         'Admin'
     );
 
 
-$showAdminMenu =
-    $canAccessAdmin
-    || $canViewUsers
-    || $canViewDeletedPosts
-    || $isAdmin;
-
-
-$unreadNotifications =
-    (int) (
-        $navContext['unread_notifications']
-        ?? 0
+$isModerator =
+    $navLoggedIn
+    && hasRole(
+        $pdo,
+        'Moderator'
     );
 
 
-$profilePicture =
+
+
+$canCreatePost =
+    $navLoggedIn
+    && can(
+        $pdo,
+        'create_post'
+    );
+
+
+
+$canModerate =
+    $isModerator
+    || $isAdmin;
+
+
+$canAccessAdmin =
+    $isAdmin;
+
+
+
+$canViewUsers =
+    $navLoggedIn
+    && can(
+        $pdo,
+        'view_users'
+    );
+
+
+$canManageCategories =
+    $isAdmin;
+
+
+$canViewDeletedPosts =
+    $isAdmin;
+
+
+$canViewActivityLog =
+    $isAdmin;
+
+$showAdminMenu =
+    $isAdmin
+    || (
+        $isModerator
+        && $canViewUsers
+    );
+
+
+
+$email =
     trim(
-        $navContext['profile_picture']
+        $navUser['email']
             ?? ''
     );
 
 
 $firstName =
     trim(
-        $navContext['first_name']
+        $navUser['first_name']
             ?? ''
     );
 
 
 $lastName =
     trim(
-        $navContext['last_name']
+        $navUser['last_name']
+            ?? ''
+    );
+
+
+$profilePicture =
+    trim(
+        $navUser['profile_picture']
             ?? ''
     );
 
@@ -134,17 +211,18 @@ $displayName =
     );
 
 
-if (
-    $displayName === ''
-    && $navContext !== null
-) {
+if ($displayName === '') {
 
     $displayName =
-        $navContext['email'];
+        $email !== ''
+        ? $email
+        : 'User';
 }
 
 
-$initials = 'U';
+
+$initials =
+    'U';
 
 
 if ($firstName !== '') {
@@ -170,6 +248,16 @@ if ($firstName !== '') {
                 )
             );
     }
+} elseif ($email !== '') {
+
+    $initials =
+        mb_strtoupper(
+            mb_substr(
+                $email,
+                0,
+                1
+            )
+        );
 }
 
 ?>
@@ -177,19 +265,31 @@ if ($firstName !== '') {
 
 <header class="app-header">
 
+
     <div class="app-header-inner">
 
+
+        <!-- =========================
+             BRAND
+             ========================= -->
 
         <a
             href="/posts.php"
             class="app-brand">
 
-            Test App
+            Aram App
 
         </a>
 
 
+        <!-- =========================
+             MAIN NAVIGATION
+             ========================= -->
+
         <nav class="app-main-nav">
+
+
+            <!-- FEED -->
 
             <a
                 href="/posts.php"
@@ -205,6 +305,8 @@ if ($firstName !== '') {
             <?php if ($navLoggedIn): ?>
 
 
+                <!-- DASHBOARD -->
+
                 <a
                     href="/Components/Dashboard/Dashboard.php"
                     class="app-nav-link<?= $isActive(
@@ -215,6 +317,8 @@ if ($firstName !== '') {
 
                 </a>
 
+
+                <!-- CREATE POST -->
 
                 <?php if ($canCreatePost): ?>
 
@@ -231,10 +335,12 @@ if ($firstName !== '') {
                 <?php endif; ?>
 
 
+                <!-- SAVED POSTS -->
+
                 <a
                     href="/Components/SavedPosts/SavedPosts.php"
-                    class="app-nav-link<?= $isActive(
-                                            '/Components/SavedPosts/SavedPosts.php'
+                    class="app-nav-link<?= $isSectionActive(
+                                            '/Components/SavedPosts/'
                                         ) ?>">
 
                     Saved
@@ -242,42 +348,91 @@ if ($firstName !== '') {
                 </a>
 
 
+                <!-- =========================
+                     MODERATOR
+                     ========================= -->
+
                 <?php if ($canModerate): ?>
 
                     <a
                         href="/moderator.php"
-                        class="app-nav-link">
+                        class="app-nav-link<?= (
+                                                $currentPath === '/moderator.php'
+                                                || str_starts_with(
+                                                    $currentPath,
+                                                    '/Components/Moderator/'
+                                                )
+                                            )
+                                                ? ' app-nav-active'
+                                                : '' ?>">
 
-                        Moderation
+                        Moderator
 
                     </a>
 
                 <?php endif; ?>
 
 
+                <!-- =========================
+                     ADMIN MAIN PAGE
+                     ADMIN ONLY
+                     ========================= -->
+
+                <?php if ($canAccessAdmin): ?>
+
+                    <a
+                        href="/Components/Admin/Admin.php"
+                        class="app-nav-link<?= $isActive(
+                                                '/Components/Admin/Admin.php'
+                                            ) ?>">
+
+                        Admin
+
+                    </a>
+
+                <?php endif; ?>
+
+
+                <!-- =========================
+                     ADMIN PAGES
+                     ========================= -->
+
                 <?php if ($showAdminMenu): ?>
 
-                    <details class="app-nav-dropdown">
 
-                        <summary class="app-nav-link">
-                            Administration
+                    <details
+                        class="app-nav-dropdown">
+
+
+                        <summary
+                            class="app-nav-link<?= (
+                                                    str_starts_with(
+                                                        $currentPath,
+                                                        '/Components/Admin/'
+                                                    )
+                                                    || str_starts_with(
+                                                        $currentPath,
+                                                        '/Components/Categories/'
+                                                    )
+                                                )
+                                                    ? ' app-nav-active'
+                                                    : '' ?>">
+
+                            Admin Pages
+
                         </summary>
 
 
-                        <div class="app-dropdown-menu">
+                        <div
+                            class="app-dropdown-menu">
 
 
-                            <?php if ($canAccessAdmin): ?>
+                            <!-- =====================
+                                 USERS
 
-                                <a
-                                    href="/Components/Admin/Admin.php">
-
-                                    Admin Panel
-
-                                </a>
-
-                            <?php endif; ?>
-
+                                 Admin + Moderator
+                                 with view_users
+                                 ===================== -->
 
                             <?php if ($canViewUsers): ?>
 
@@ -291,7 +446,12 @@ if ($firstName !== '') {
                             <?php endif; ?>
 
 
+                            <!-- =====================
+                                 ADMIN-ONLY PAGES
+                                 ===================== -->
+
                             <?php if ($isAdmin): ?>
+
 
                                 <a
                                     href="/Components/Categories/AdminCategories.php">
@@ -300,10 +460,6 @@ if ($firstName !== '') {
 
                                 </a>
 
-                            <?php endif; ?>
-
-
-                            <?php if ($canViewDeletedPosts): ?>
 
                                 <a
                                     href="/Components/Admin/DeletedPosts.php">
@@ -312,10 +468,6 @@ if ($firstName !== '') {
 
                                 </a>
 
-                            <?php endif; ?>
-
-
-                            <?php if ($canAccessAdmin): ?>
 
                                 <a
                                     href="/Components/Admin/Audit/Audit.php">
@@ -324,12 +476,15 @@ if ($firstName !== '') {
 
                                 </a>
 
+
                             <?php endif; ?>
 
 
                         </div>
 
+
                     </details>
+
 
                 <?php endif; ?>
 
@@ -340,8 +495,14 @@ if ($firstName !== '') {
         </nav>
 
 
+        <!-- =========================
+             RIGHT SIDE
+             ========================= -->
+
         <div class="app-header-actions">
 
+
+            <!-- THEME -->
 
             <button
                 type="button"
@@ -356,6 +517,10 @@ if ($firstName !== '') {
             <?php if ($navLoggedIn): ?>
 
 
+                <!-- =========================
+                     NOTIFICATIONS
+                     ========================= -->
+
                 <a
                     href="/Components/Notifications/Notifications.php"
                     class="app-notification-button"
@@ -368,15 +533,28 @@ if ($firstName !== '') {
                         aria-hidden="true">
 
                         <path
-                            d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4">
+                            d="
+                                M18 8
+                                a6 6 0 0 0-12 0
+                                c0 7-3 7-3 9
+                                h18
+                                c0-2-3-2-3-9
+
+                                M10 21
+                                h4
+                            ">
                         </path>
 
                     </svg>
 
 
-                    <?php if ($unreadNotifications > 0): ?>
+                    <?php if (
+                        $unreadNotifications > 0
+                    ): ?>
 
-                        <span class="app-notification-badge">
+
+                        <span
+                            class="app-notification-badge">
 
                             <?= $unreadNotifications > 99
                                 ? '99+'
@@ -384,11 +562,16 @@ if ($firstName !== '') {
 
                         </span>
 
+
                     <?php endif; ?>
 
 
                 </a>
 
+
+                <!-- =========================
+                     PROFILE
+                     ========================= -->
 
                 <details class="app-profile-menu">
 
@@ -402,7 +585,10 @@ if ($firstName !== '') {
                                 ) ?>">
 
 
-                        <?php if ($profilePicture !== ''): ?>
+                        <?php if (
+                            $profilePicture !== ''
+                        ): ?>
+
 
                             <img
                                 src="<?= htmlspecialchars(
@@ -410,9 +596,15 @@ if ($firstName !== '') {
                                             ENT_QUOTES,
                                             'UTF-8'
                                         ) ?>"
-                                alt="Profile">
+                                alt="<?= htmlspecialchars(
+                                            $displayName,
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
+
 
                         <?php else: ?>
+
 
                             <span>
 
@@ -424,16 +616,22 @@ if ($firstName !== '') {
 
                             </span>
 
+
                         <?php endif; ?>
 
 
                     </summary>
 
 
-                    <div class="app-profile-dropdown">
+                    <div
+                        class="app-profile-dropdown">
 
 
-                        <div class="app-profile-info">
+                        <!-- USER INFORMATION -->
+
+                        <div
+                            class="app-profile-info">
+
 
                             <strong>
 
@@ -449,16 +647,18 @@ if ($firstName !== '') {
                             <span>
 
                                 <?= htmlspecialchars(
-                                    $navContext['email']
-                                        ?? '',
+                                    $email,
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>
 
                             </span>
 
+
                         </div>
 
+
+                        <!-- PROFILE -->
 
                         <a
                             href="/Components/Profile/Profile.php">
@@ -468,6 +668,8 @@ if ($firstName !== '') {
                         </a>
 
 
+                        <!-- EDIT PROFILE -->
+
                         <a
                             href="/Components/Profile/EditProfile.php">
 
@@ -476,34 +678,34 @@ if ($firstName !== '') {
                         </a>
 
 
-                        <?php if (
-                            is_file(
-                                $_SERVER['DOCUMENT_ROOT']
-                                    . '/Components/Settings/Settings.php'
-                            )
-                        ): ?>
-
-                            <a
-                                href="/Components/Settings/Settings.php">
-
-                                Settings
-
-                            </a>
-
-                        <?php endif; ?>
-
-
-                        <div class="app-profile-separator">
+                        <div
+                            class="app-profile-separator">
                         </div>
 
 
-                        <a
-                            href="/logout.php"
-                            class="app-logout-link">
+                        <form
+                            method="POST"
+                            action="/logout.php"
+                            class="app-logout-form">
 
-                            Logout
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?= htmlspecialchars(
+                                            $headerCsrfToken,
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>">
 
-                        </a>
+                            <button
+                                type="submit"
+                                class="app-logout-link">
+
+                                Logout
+
+                            </button>
+
+                        </form>
 
 
                     </div>
@@ -514,6 +716,10 @@ if ($firstName !== '') {
 
             <?php else: ?>
 
+
+                <!-- =========================
+                     GUEST
+                     ========================= -->
 
                 <a
                     href="/Components/Login/Login.php"
@@ -540,5 +746,6 @@ if ($firstName !== '') {
 
 
     </div>
+
 
 </header>

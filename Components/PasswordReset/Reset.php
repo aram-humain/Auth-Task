@@ -2,14 +2,30 @@
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/ResetVal.php';
 require_once __DIR__ . '/ResetDB.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/csrf.php';
 
 $token = trim($_GET['token'] ?? $_POST['token'] ?? '');
 $errors = [];
 $success = '';
 
+$csrfToken = csrfToken();
+
 if ($token === '') {
     $errors[] = 'The password reset link is invalid.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    if (
+        !verifyCsrfToken(
+            $_POST['csrf_token']
+                ?? null
+        )
+    ) {
+
+        http_response_code(403);
+
+        exit('Invalid CSRF token.');
+    }
+    
     $password = $_POST['password'] ?? '';
     $passwordConfirmation = $_POST['password_confirmation'] ?? '';
     $errors = validateResetPassword($password, $passwordConfirmation);

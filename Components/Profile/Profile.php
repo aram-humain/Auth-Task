@@ -58,7 +58,11 @@ $profilePosts = getProfilePostsByUserId(
     $canSeePrivatePosts
 );
 
-
+$profileStatistics =
+    getProfileStatistics(
+        $pdo,
+        (int) $profile['user_id']
+    );
 
 foreach ($profilePosts as &$profilePost) {
 

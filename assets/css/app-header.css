@@ -526,6 +526,25 @@
         #ffffff;
 }
 
+.app-logout-form {
+    margin: 0;
+}
+
+
+.app-logout-form .app-logout-link {
+    width: 100%;
+
+    border: 0;
+
+    background: transparent;
+
+    text-align: left;
+
+    font: inherit;
+
+    cursor: pointer;
+}
+
 
 /* MOBILE */
 

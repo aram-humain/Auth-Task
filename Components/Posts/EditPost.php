@@ -104,6 +104,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (
         $error === null
+        && mb_strlen($title) > 255
+    ) {
+
+        $error =
+            'Title is too long. Maximum 255 characters.';
+    }
+
+    if (
+        $error === null
         && (
             !$categoryId
             || !isCategoryExists(

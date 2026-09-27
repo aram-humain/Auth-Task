@@ -130,113 +130,6 @@ function getAllRoles(PDO $pdo): array
     return $stmt->fetchAll();
 }
 
-function logAudit(
-    PDO $pdo, 
-    int $actorUserId,
-    ?int $targetUserId,
-    string $action,
-    ?string $oldValue = null,
-    ?string $newValue = null
-): void {
-    $stmt = $pdo->prepare(
-        'INSERT INTO audit_logs (
-        actor_user_id,
-        target_user_id,
-        action,
-        old_value,
-        new_value
-        )
-        VALUES (
-        :actor_user_id,
-        :target_user_id,
-        :action,
-        :old_value,
-        :new_value
-        )'
-    );
-
-    $stmt->execute([
-        'actor_user_id' => $actorUserId,
-        'target_user_id' => $targetUserId,
-        'action' => $action,
-        'old_value' => $oldValue,
-        'new_value' => $newValue
-    ]);
-}
-
-function getAuditLogs(
-    PDO $pdo
-): array {
-
-    $stmt = $pdo->prepare(
-        "SELECT
-            al.id,
-            al.action,
-            al.old_value,
-            al.new_value,
-            al.created_at,
-
-            actor.id AS actor_id,
-
-            COALESCE(
-                NULLIF(
-                    TRIM(
-                        CONCAT_WS(
-                            ' ',
-                            actor_profile.first_name,
-                            actor_profile.last_name
-                        )
-                    ),
-                    ''
-                ),
-                actor.email
-            ) AS actor_name,
-
-            target.id AS target_id,
-
-            COALESCE(
-                NULLIF(
-                    TRIM(
-                        CONCAT_WS(
-                            ' ',
-                            target_profile.first_name,
-                            target_profile.last_name
-                        )
-                    ),
-                    ''
-                ),
-                target.email
-            ) AS target_name
-
-         FROM audit_logs al
-
-         INNER JOIN users actor
-            ON actor.id =
-               al.actor_user_id
-
-         LEFT JOIN profiles actor_profile
-            ON actor_profile.user_id =
-               actor.id
-
-         LEFT JOIN users target
-            ON target.id =
-               al.target_user_id
-
-         LEFT JOIN profiles target_profile
-            ON target_profile.user_id =
-               target.id
-
-         ORDER BY al.id DESC"
-    );
-
-
-    $stmt->execute();
-
-
-    return $stmt->fetchAll(
-        PDO::FETCH_ASSOC
-    );
-}
 
 function changeUserRole(PDO $pdo, int $userId, int $roleId, int $actorUserId, ?string $ipAddress = null): void
 {
@@ -314,14 +207,6 @@ function changeUserRole(PDO $pdo, int $userId, int $roleId, int $actorUserId, ?s
 
         $insertStatement->execute(['user_id' => $userId, 'role_id' => $roleId]);
 
-        logAudit(
-            $pdo,
-            $actorUserId,
-            $userId,
-            'change_user_role',
-            $oldRole['name'],
-            $newRole['name'],
-        );
 
         logActivity(
             $pdo,

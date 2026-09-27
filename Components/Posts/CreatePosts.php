@@ -27,22 +27,22 @@ $categoryId = null;
 $status = 'draft';
 
 
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if(!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
         http_response_code(403);
 
         require $_SERVER['DOCUMENT_ROOT'] . '/Components/Error/403.php';
         exit;
     }
 
-    if(!isUserVerified($pdo, $userId)) {
+    if (!isUserVerified($pdo, $userId)) {
         $error = 'You must verify your email to creating post.';
     }
 
-    if($error === null) {
+    if ($error === null) {
         $postsLast24Hours = countRecentAttempts($pdo, 'create_post', 86400, $userId);
 
-        if($postsLast24Hours >= 10) {
+        if ($postsLast24Hours >= 10) {
             $error = 'You can create a maximum of 10 posts within 24 hours.';
         }
     }
@@ -53,7 +53,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     $categoryId = filter_input(INPUT_POST, 'category_id', FILTER_VALIDATE_INT);
     $status = trim($_POST['status'] ?? '');
 
-    if($error === null && $title === '') {
+    if ($error === null && $title === '') {
         $error = 'Title is required.';
     }
 
@@ -61,7 +61,15 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Invalid post status.';
     }
 
-    if($error === null && !in_array($status, ['draft', 'published'], true)) {
+    if ($error === null && mb_strlen($title > 255)) {
+        $error = 'Title is too long. Maximum 255 characters.';
+    }
+
+    if ($error = null && !$categoryId || !isCategoryExists($pdo, $categoryId)) {
+        $error = 'Invalid category';
+    }
+
+    if ($error === null && !in_array($status, ['draft', 'published'], true)) {
         $error = 'A new post must be draf or published';
     }
 
@@ -71,68 +79,72 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-        $postId = createPost(
-            $pdo, 
-            $publicId,
-            $userId,
-            $title,
-            $categoryId,
-            $content,
-            $status
-        );
+            $postId = createPost(
+                $pdo,
+                $publicId,
+                $userId,
+                $title,
+                $categoryId,
+                $content,
+                $status
+            );
 
-        if ($tagsInput !== '') {
-            processPostTags($pdo, $postId, $tagsInput);
-        }
+            if ($tagsInput !== '') {
+                processPostTags($pdo, $postId, $tagsInput);
+            }
 
-        if (isset($_FILES['images']) && isset($_FILES['images']['name'])) {
+            if (isset($_FILES['images']) && isset($_FILES['images']['name'])) {
 
-            $imageCount = count($_FILES['images']['name']);
+                $imageCount = count($_FILES['images']['name']);
 
-            for($i = 0; $i < $imageCount; $i++) {
-                if($_FILES['images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
-                    continue;
+                if ($imageCount > 5) {
+                    throw new RuntimeException('A post can contain a maximum 5 images');
                 }
 
-                $file = [
-                    'name' => $_FILES['images']['name'][$i],
-                    'type' => $_FILES['images']['type'][$i],
-                    'tmp_name' => $_FILES['images']['tmp_name'][$i],
-                    'error' => $_FILES['images']['error'][$i],
-                    'size' => $_FILES['images']['size'][$i],
-                ];
+                for ($i = 0; $i < $imageCount; $i++) {
+                    if ($_FILES['images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                        continue;
+                    }
 
-                $uploaded = uploadFile($file, 'post');
+                    $file = [
+                        'name' => $_FILES['images']['name'][$i],
+                        'type' => $_FILES['images']['type'][$i],
+                        'tmp_name' => $_FILES['images']['tmp_name'][$i],
+                        'error' => $_FILES['images']['error'][$i],
+                        'size' => $_FILES['images']['size'][$i],
+                    ];
 
-                $uploadedFiles[] = $uploaded['public_id'];
+                    $uploaded = uploadFile($file, 'post');
 
-                addPostImage($pdo, $postId, $uploaded['url'], $uploaded['public_id'], $i);
+                    $uploadedFiles[] = $uploaded['public_id'];
+
+                    addPostImage($pdo, $postId, $uploaded['url'], $uploaded['public_id'], $i);
+                }
             }
-        }
 
-        if ($content === '' && empty($uploadedFiles)) {
-            throw new RuntimeException(
-                'Post must containt text or at least one image.'
-            );
-        }
+            if ($content === '' && empty($uploadedFiles)) {
+                throw new RuntimeException(
+                    'Post must containt text or at least one image.'
+                );
+            }
 
-        recordRateLimitAttempt($pdo, 'create_post', $userId, null, $_SERVER['REMOTE_ADDR'] ?? null);
+            recordRateLimitAttempt($pdo, 'create_post', $userId, null, $_SERVER['REMOTE_ADDR'] ?? null);
 
-        logActivity($pdo, $userId, 'post_created', 'post', $postId, $_SERVER['REMOTE_ADDR'] ?? null);
+            logActivity($pdo, $userId, 'post_created', 'post', $postId, $_SERVER['REMOTE_ADDR'] ?? null);
 
-        $pdo->commit();
+            $pdo->commit();
 
-        setFlash('success', 'Post created successfully.');
+            setFlash('success', 'Post created successfully.');
 
-        header('Location: /Components/Posts/Posts.php');
+            header('Location: /Components/Posts/Posts.php');
 
-        exit;
-        } catch(Throwable $exception) {
+            exit;
+        } catch (Throwable $exception) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
 
-            foreach($uploadedFiles as $publicId) {
+            foreach ($uploadedFiles as $publicId) {
                 try {
                     deleteFile($publicId);
                 } catch (Throwable $deleteException) {

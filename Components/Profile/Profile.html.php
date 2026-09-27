@@ -4,6 +4,7 @@
 /** @var array $isOwner */
 /** @var array $profilePosts */
 /** @var array $isAdmin */
+/** @var array|null $profileStatistics */
 
 
 $firstName = $profile['first_name'] ?? '';
@@ -53,7 +54,7 @@ if ($fullName === '') {
         . '/includes/app_header.php';
     ?>
 
- 
+
 
     <main class="profile-container">
 
@@ -105,6 +106,78 @@ if ($fullName === '') {
                 </div>
 
             </div>
+
+            <?php if ($profileStatistics !== null): ?>
+
+                <section class="profile-statistics">
+
+
+                    <div class="profile-stat-item">
+
+                        <strong>
+                            <?= (int) $profileStatistics['published_posts'] ?>
+                        </strong>
+
+                        <span>
+                            Published Posts
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-stat-item">
+
+                        <strong>
+                            <?= (int) $profileStatistics['comments_count'] ?>
+                        </strong>
+
+                        <span>
+                            Comments
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-stat-item">
+
+                        <strong>
+                            <?= (int) $profileStatistics['likes_received'] ?>
+                        </strong>
+
+                        <span>
+                            Likes Received
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-stat-item">
+
+                        <strong>
+
+                            <?= htmlspecialchars(
+                                date(
+                                    'M Y',
+                                    strtotime(
+                                        $profileStatistics['member_since']
+                                    )
+                                ),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
+                        </strong>
+
+                        <span>
+                            Member Since
+                        </span>
+
+                    </div>
+
+
+                </section>
+
+            <?php endif; ?>
 
             <div class="profile-section">
 

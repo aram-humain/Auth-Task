@@ -3,6 +3,7 @@
 /** @var string|null $error */
 /** @var string|null $success */
 /** @var string $email */
+/** @var string $csrfToken */
 
 ?>
 
@@ -15,20 +16,17 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Forgot Password</title>
 
     <link
         rel="stylesheet"
-        href="./Forgot.css"
-    >
+        href="./Forgot.css">
 
     <link
         rel="stylesheet"
-        href="/assets/css/theme.css"
-    >
+        href="/assets/css/theme.css">
 
     <script src="/assets/js/theme.js"></script>
 
@@ -38,117 +36,119 @@
 
 
 
-<button
-    type="button"
-    id="theme-toggle"
-    class="theme-toggle"
->
-    Theme
-</button>
+    <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle">
+        Theme
+    </button>
 
-<main class="forgot-container">
+    <main class="forgot-container">
 
-    <section
-        class="forgot-card"
-        aria-labelledby="forgot-title"
-    >
+        <section
+            class="forgot-card"
+            aria-labelledby="forgot-title">
 
-        <div class="forgot-header">
+            <div class="forgot-header">
 
-            <div
-                class="lock-mark"
-                aria-hidden="true"
-            >
-                ?
+                <div
+                    class="lock-mark"
+                    aria-hidden="true">
+                    ?
+                </div>
+
+                <h1 id="forgot-title">
+                    Forgot Password?
+                </h1>
+
+                <p>
+                    Enter your email and we will send you
+                    a password reset link.
+                </p>
+
             </div>
 
-            <h1 id="forgot-title">
-                Forgot Password?
-            </h1>
+            <?php if (!empty($error)): ?>
 
-            <p>
-                Enter your email and we will send you
-                a password reset link.
-            </p>
-
-        </div>
-
-        <?php if (!empty($error)): ?>
-
-            <div
-                class="message message-error"
-                role="alert"
-            >
-                <?= htmlspecialchars(
-                    $error,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
-            </div>
-
-        <?php endif; ?>
-
-        <?php if (!empty($success)): ?>
-
-            <div
-                class="message message-success"
-                role="status"
-            >
-                <?= htmlspecialchars(
-                    $success,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>
-            </div>
-
-        <?php endif; ?>
-
-        <form method="POST" action="">
-
-            <div class="form-group">
-
-                <label for="email">
-                    Email Address
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    value="<?= htmlspecialchars(
-                        $email ?? '',
+                <div
+                    class="message message-error"
+                    role="alert">
+                    <?= htmlspecialchars(
+                        $error,
                         ENT_QUOTES,
                         'UTF-8'
-                    ) ?>"
-                    autocomplete="email"
-                    required
-                >
+                    ) ?>
+                </div>
 
-            </div>
+            <?php endif; ?>
 
-            <button
-                type="submit"
-                class="forgot-button"
-            >
-                Send Reset Link
-            </button>
+            <?php if (!empty($success)): ?>
 
-        </form>
+                <div
+                    class="message message-success"
+                    role="status">
+                    <?= htmlspecialchars(
+                        $success,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>
+                </div>
 
-        <p class="back-link">
+            <?php endif; ?>
 
-            Remember your password?
+            <form method="POST" action="">
 
-            <a href="/Components/Login/Login.php">
-                Back to Login
-            </a>
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                                $csrfToken,
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
 
-        </p>
+                <div class="form-group">
 
-    </section>
+                    <label for="email">
+                        Email Address
+                    </label>
 
-</main>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        value="<?= htmlspecialchars(
+                                    $email ?? '',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                        autocomplete="email"
+                        required>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="forgot-button">
+                    Send Reset Link
+                </button>
+
+            </form>
+
+            <p class="back-link">
+
+                Remember your password?
+
+                <a href="/Components/Login/Login.php">
+                    Back to Login
+                </a>
+
+            </p>
+
+        </section>
+
+    </main>
 
 </body>
 

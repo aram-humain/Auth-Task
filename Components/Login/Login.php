@@ -5,6 +5,7 @@ require_once __DIR__ . '/LoginVal.php';
 require_once __DIR__ . '/LoginDB.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/rate_limit.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/activity_log.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/csrf.php';
 
 
 
@@ -27,8 +28,23 @@ $errors = [];
 
 $email = '';
 
+$csrfToken =
+    csrfToken();
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    if (
+        !verifyCsrfToken(
+            $_POST['csrf_token']
+                ?? null
+        )
+    ) {
+
+        http_response_code(403);
+
+        exit('Invalid CSRF token.');
+    }
 
     $email = strtolower(
         trim(

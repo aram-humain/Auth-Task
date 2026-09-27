@@ -1,11 +1,11 @@
 <?php
 
 /** @var array $user */
-/** @var int $unreadNotificationCount */
 
 ?>
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -18,6 +18,7 @@
 
     <title>Dashboard</title>
 
+
     <link
         rel="stylesheet"
         href="./Dashboard.css">
@@ -26,200 +27,184 @@
         rel="stylesheet"
         href="/assets/css/theme.css">
 
-    <script src="/assets/js/theme.js"></script>
+
+    <script
+        src="/assets/js/theme.js"
+        defer>
+    </script>
 
 </head>
 
+
 <body>
 
+
     <?php
+
     require $_SERVER['DOCUMENT_ROOT']
         . '/includes/app_header.php';
+
     ?>
 
 
     <main class="dashboard-container">
 
+
         <section class="dashboard-card">
 
+
             <div class="dashboard-header">
+
 
                 <h1>
                     Dashboard
                 </h1>
 
+
                 <p>
+
                     Welcome,
+
                     <strong>
+
                         <?= htmlspecialchars(
-                            $user['email'],
+                            trim(
+                                ($user['first_name'] ?? '')
+                                    . ' '
+                                    . ($user['last_name'] ?? '')
+                            ) !== ''
+                                ? trim(
+                                    ($user['first_name'] ?? '')
+                                        . ' '
+                                        . ($user['last_name'] ?? '')
+                                )
+                                : $user['email'],
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>
+
                     </strong>
+
                 </p>
+
 
             </div>
 
+
             <section class="info-section">
+
 
                 <h2>
                     Your Information
                 </h2>
 
+
                 <div class="info-box">
 
+
                     <div class="info-row">
+
 
                         <span class="info-label">
                             ID
                         </span>
 
+
                         <span class="info-value">
+
                             <?= htmlspecialchars(
                                 (string) $user['id'],
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
+
                         </span>
+
 
                     </div>
 
+
                     <div class="info-row">
+
 
                         <span class="info-label">
                             Full Name
                         </span>
 
+
                         <span class="info-value">
+
                             <?= htmlspecialchars(
-                                $user['first_name'] . ' ' . $user['last_name'],
+                                trim(
+                                    ($user['first_name'] ?? '')
+                                        . ' '
+                                        . ($user['last_name'] ?? '')
+                                ),
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
+
                         </span>
+
 
                     </div>
 
+
                     <div class="info-row">
+
 
                         <span class="info-label">
                             Email
                         </span>
 
+
                         <span class="info-value">
+
                             <?= htmlspecialchars(
                                 $user['email'],
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
+
                         </span>
+
 
                     </div>
 
+
                     <div class="info-row">
+
 
                         <span class="info-label">
                             Registered
                         </span>
 
+
                         <span class="info-value">
+
                             <?= htmlspecialchars(
                                 $user['created_at'],
                                 ENT_QUOTES,
                                 'UTF-8'
                             ) ?>
+
                         </span>
+
 
                     </div>
 
+
                 </div>
+
 
             </section>
 
-            <div class="dashboard-actions">
-
-                <?php if (can($pdo, 'access_moderator_page')): ?>
-
-                    <a
-                        href="/Components/Moderator/Moderator.php"
-                        class="dashboard-action">
-                        Moderator
-                    </a>
-
-                <?php endif; ?>
-
-                <?php if (can($pdo, 'access_admin_page')): ?>
-
-                    <a
-                        href="/Components/Admin/Admin.php"
-                        class="dashboard-action">
-                        Admin
-                    </a>
-
-                <?php endif; ?>
-
-                <?php if (can($pdo, 'view_users')): ?>
-
-                    <a
-                        href="/Components/Admin/Users/Users.php"
-                        class="dashboard-action">
-                        Users
-                    </a>
-
-                <?php endif; ?>
-
-                <a
-                    href="/Components/Profile/Profile.php"
-                    class="dashboard-action">
-                    Profile
-                </a>
-
-                <a
-                    href="/Components/Notifications/Notifications.php"
-                    class="dashboard-action dashboard-notification-action">
-
-                    Notifications
-
-                    <?php if ($unreadNotificationCount > 0): ?>
-
-                        <span class="dashboard-notification-badge">
-
-                            <?= htmlspecialchars(
-                                (string) $unreadNotificationCount,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-
-                        </span>
-
-                    <?php endif; ?>
-
-                </a>
-
-                <a
-                    href="/Components/SavedPosts/SavedPosts.php"
-                    class="dashboard-action">
-
-                    Saved Posts
-
-                </a>
-
-            </div>
-
-            <div class="logout-container">
-
-                <a
-                    href="/logout.php"
-                    class="logout-button">
-                    Logout
-                </a>
-
-            </div>
 
         </section>
 
+
     </main>
+
 
 </body>
 

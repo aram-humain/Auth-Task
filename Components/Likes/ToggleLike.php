@@ -13,6 +13,16 @@ use Ramsey\Uuid\Uuid;
 
 requireLogin();
 
+if (
+    $_SERVER['REQUEST_METHOD']
+    !== 'POST'
+) {
+
+    http_response_code(405);
+
+    exit('Method not allowed.');
+}
+
 if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
     http_response_code(403);
     exit('Invalid CSRF token');
@@ -90,10 +100,18 @@ try {
 
     exit;
 } catch (Throwable $exception) {
+
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
-    http_response_code(500);
-    exit('Unable to update like');
+    echo '<pre>';
+    echo htmlspecialchars(
+        $exception->getMessage(),
+        ENT_QUOTES,
+        'UTF-8'
+    );
+    echo '</pre>';
+
+    exit;
 }

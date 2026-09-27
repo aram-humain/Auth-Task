@@ -135,3 +135,56 @@ function removeProfilePicture(PDO $pdo, int $userId): void {
         'user_id' => $userId
     ]);
 }
+
+function getProfileStatistics(
+    PDO $pdo,
+    int $userId
+): ?array {
+    
+    $statement = $pdo->prepare(
+        "SELECT 
+        u.created_at AS member_since,
+        
+        (
+        SELECT COUNT(*) 
+        FROM posts p
+        WHERE p.user_id = u.id
+        AND p.status = 'published'
+        AND p.deleted_at IS NULL
+        ) AS published_posts,
+        
+        (
+        SELECT COUNT(*) 
+        FROM comments c
+        INNER JOIN posts p
+        ON p.id = c.post_id
+        
+        WHERE c.user_id = u.id
+        AND c.deleted_at IS NULL
+        AND p.status = 'published'
+        AND p.deleted_at IS NULL
+        ) AS comments_count,
+        
+        (
+        SELECT COUNT(*)
+        FROM post_likes pl
+        INNER JOIN posts p
+        WHERE p.user_id = u.id
+        AND p.status = 'published'
+        AND p.deleted_at IS NULL
+        ) AS likes_received
+        
+        FROM users u 
+        WHERE u.id = :user_id
+        
+        LIMIT 1"
+    );
+
+    $statement->execute([
+        'user_id' => $userId
+    ]);
+
+    $statistics = $statement->fetch(PDO::FETCH_ASSOC);
+
+    return $statistics ?: null;
+}

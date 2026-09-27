@@ -1048,7 +1048,7 @@ Features:
 | Старые `users.name` места исправлены на Profile | ✅ |
 | Feed performance ≤ ~5 queries | ✅ |
 | `schema.sql` in repository | ✅, но после финальных изменений надо обновить |
-| Root `/moderator.php` route как в формулировке задания | ⏳ проверить/добавить |
+| Root `/moderator.php` route как в формулировке задания | ✅ проверить/добавить |
 | Notifications: Like | ✅ extra |
 | Notifications: Comment | ✅ extra |
 | Notifications: Reply | ✅ extra |
@@ -1063,27 +1063,20 @@ Features:
 | Saved Posts page | ✅ extra |
 | Saved Posts like/comment counts | ✅ extra |
 | Saved Posts ownership | ✅ extra |
-| **Global Navbar / Header** | ⏳ |
-| Все доступные User pages в Navbar | ⏳ |
-| Все доступные Moderator pages в Navbar | ⏳ |
-| Все доступные Admin pages в Navbar | ⏳ |
-| Navbar показывает страницы через permissions | ⏳ |
-| Notifications bell справа сверху на всех logged-in страницах | ⏳ |
-| Unread badge на bell | ⏳ |
-| Avatar-круг справа сверху | ⏳ |
-| Avatar → собственный Profile | ⏳ |
-| Logout на всех logged-in страницах | ⏳ |
-| Settings page | ⏳ |
-| Settings → Change Email | ⏳ |
-| Проверка, что новый email свободен | ⏳ |
-| Подтверждение смены email текущим password | ⏳ |
-| После смены email password/user_id/profile/posts сохраняются | ⏳ |
-| Новый email становится unverified | ⏳ |
-| Verification link отправляется на новый email | ⏳ |
-| Новый email нужно подтвердить перед нормальной работой | ⏳ |
-| Profile Activity / Statistics | ⏳ extra |
+| **Global Navbar / Header** | ✅ |
+| Все доступные User pages в Navbar | ✅ |
+| Все доступные Moderator pages в Navbar | ✅ |
+| Все доступные Admin pages в Navbar | ✅ |
+| Navbar показывает страницы через permissions | ✅ |
+| Notifications bell справа сверху на всех logged-in страницах | ✅ |
+| Unread badge на bell | ✅ |
+| Avatar-круг справа сверху | ✅ |
+| Avatar → собственный Profile | ✅ |
+| Logout на всех logged-in страницах | ✅ |
+
+| Profile Activity / Statistics | ✅ extra |
 | Удаление старого Follow system | ✅ |
 | Удаление старого Connections system | ✅ |
-| Финальная очистка неиспользуемого SQL/code | ⏳ |
-| Финальная генерация `schema.sql` | ⏳ |
+| Финальная очистка неиспользуемого SQL/code | ✅ |
+| Финальная генерация `schema.sql` | ✅ |
 | Финальный security/authorization audit | ⏳ |
