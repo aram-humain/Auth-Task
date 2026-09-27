@@ -167,8 +167,12 @@ function getProfileStatistics(
         
         (
         SELECT COUNT(*)
+
         FROM post_likes pl
+
         INNER JOIN posts p
+            ON p.id = pl.post_id
+
         WHERE p.user_id = u.id
         AND p.status = 'published'
         AND p.deleted_at IS NULL

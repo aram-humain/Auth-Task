@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Title is too long. Maximum 255 characters.';
     }
 
-    if ($error = null && !$categoryId || !isCategoryExists($pdo, $categoryId)) {
+    if ($error === null && !$categoryId || !isCategoryExists($pdo, $categoryId)) {
         $error = 'Invalid category';
     }
 

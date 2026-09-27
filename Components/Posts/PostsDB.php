@@ -49,86 +49,173 @@ function getAllCategories(PDO $pdo): array
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getTagByName(PDO $pdo, string $name): ?array
-{
-    $statement = $pdo->prepare(
-        'SELECT id, name FROM tags WHERE name = :name LIMIT 1'
-    );
-
-    $statement->execute(['name' => $name]);
-
-
-    $tag = $statement->fetch();
-    return $tag ?: null;
-}
-
-
-function createTag(PDO $pdo, string $name): int
-{
-    $statement = $pdo->prepare(
-        'INSERT INTO tags(name) VALUES (:name)'
-    );
-
-    $statement->execute(['name' => $name]);
-
-    return $pdo->lastInsertId();
-}
-
-function attachTagToPost(
+function processPostTags(
     PDO $pdo,
     int $postId,
-    int $tagId
+    string $tagsInput
 ): void {
-    $statement = $pdo->prepare(
-        'INSERT INTO post_tag (
-            post_id,
-            tag_id
-        )
-        VALUES (
-            :post_id,
-            :tag_id
-        )'
-    );
 
-    $statement->execute([
-        'post_id' => $postId,
-        'tag_id' => $tagId
-    ]);
-}
+    $rawTags =
+        explode(
+            ',',
+            $tagsInput
+        );
 
-function processPostTags(PDO $pdo, int $postId, string $tagsInput): void
-{
-    $tags = explode(',', $tagsInput);
 
     $normalizedTags = [];
 
-    foreach ($tags as $tag) {
-        $tag = strtolower(trim($tag));
+
+    foreach ($rawTags as $tag) {
+
+        $tag =
+            mb_strtolower(
+                trim($tag)
+            );
+
 
         if ($tag === '') {
             continue;
         }
 
-        if (strlen($tag) > 100) {
-            throw new RuntimeException('Tag name is too long, maximal length -> 100');
+
+        if (
+            mb_strlen($tag)
+            > 100
+        ) {
+
+            throw new RuntimeException(
+                'Tag name is too long. Maximum length is 100 characters.'
+            );
         }
 
-        $normalizedTags[] = $tag;
+
+        $normalizedTags[] =
+            $tag;
     }
 
-    $normalizedTags = array_unique($normalizedTags);
 
-    foreach ($normalizedTags as $tagName) {
-        $existingTag = getTagByName($pdo, $tagName);
+    $normalizedTags =
+        array_values(
+            array_unique(
+                $normalizedTags
+            )
+        );
 
-        if ($existingTag !== null) {
-            $tagId = (int) $existingTag['id'];
-        } else {
-            $tagId = createTag($pdo, $tagName);
-        }
 
-        attachTagToPost($pdo, $postId, $tagId);
+    if (
+        empty($normalizedTags)
+    ) {
+        return;
     }
+
+
+    $tagPlaceholders =
+        implode(
+            ', ',
+            array_fill(
+                0,
+                count($normalizedTags),
+                '(?)'
+            )
+        );
+
+
+    $insertTags =
+        $pdo->prepare(
+            "INSERT INTO tags (name)
+
+             VALUES {$tagPlaceholders}
+
+             ON DUPLICATE KEY UPDATE
+                name = VALUES(name)"
+        );
+
+
+    $insertTags->execute(
+        $normalizedTags
+    );
+
+    $selectPlaceholders =
+        implode(
+            ', ',
+            array_fill(
+                0,
+                count($normalizedTags),
+                '?'
+            )
+        );
+
+
+    $selectTags =
+        $pdo->prepare(
+            "SELECT
+                id,
+                name
+
+             FROM tags
+
+             WHERE name IN (
+                {$selectPlaceholders}
+             )"
+        );
+
+
+    $selectTags->execute(
+        $normalizedTags
+    );
+
+
+    $tagRows =
+        $selectTags->fetchAll(
+            PDO::FETCH_ASSOC
+        );
+
+
+    if (empty($tagRows)) {
+
+        throw new RuntimeException(
+            'Unable to process tags.'
+        );
+    }
+
+    $postTagValues = [];
+
+    $postTagParams = [];
+
+
+    foreach ($tagRows as $tagRow) {
+
+        $postTagValues[] =
+            '(?, ?)';
+
+
+        $postTagParams[] =
+            $postId;
+
+
+        $postTagParams[] =
+            (int) $tagRow['id'];
+    }
+
+
+    $attachTags =
+        $pdo->prepare(
+            'INSERT IGNORE INTO post_tag (
+                post_id,
+                tag_id
+            )
+
+            VALUES '
+                . implode(
+                    ', ',
+                    $postTagValues
+                )
+        );
+
+
+    $attachTags->execute(
+        $postTagParams
+    );
 }
 
 
@@ -1100,12 +1187,12 @@ function softDeletePostById(PDO $pdo, int $postId): bool
 }
 
 function changeOwnedPostStatus(
-    PDO $pdo, 
+    PDO $pdo,
     int $postId,
     int $userId,
     string $status
 ): bool {
-    if(!isValidPostStatus($status)) {
+    if (!isValidPostStatus($status)) {
         throw new InvalidArgumentException('Invalid post status.');
     }
 
